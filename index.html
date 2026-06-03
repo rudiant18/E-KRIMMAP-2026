@@ -6,665 +6,694 @@
 <title>E-KRIMMAP — Peta Rawan Kriminalitas Cepu & Padangan</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-/* ═══════════════════ DESIGN TOKENS ═══════════════════ */
+/* ═══════════════════ DESIGN TOKENS (ELEGANT & TECH) ═══════════════════ */
 :root {
-  --bg:       #07090d;
-  --bg2:      #0b0f17;
-  --bg3:      #101520;
-  --bg4:      #141c28;
-  --card:     #0e1520;
-  --border:   #1a2840;
-  --border2:  #243650;
-  --accent:   #38b6f5;
-  --accent2:  #1a8fd1;
-  --green:    #22d98e;
-  --red:      #f04040;
-  --orange:   #f07830;
-  --yellow:   #f5c842;
-  --purple:   #a86af0;
-  --tx1:      #e2eeff;
-  --tx2:      #7aa0c0;
-  --tx3:      #3d6080;
-  --head:     'Exo 2', sans-serif;
-  --mono:     'JetBrains Mono', monospace;
-  --body:     'Nunito', sans-serif;
-  --radius:   10px;
-  --shadow:   0 4px 24px rgba(0,0,0,.5);
+  --bg-base:    #030712; /* Very dark navy/black */
+  --bg-glass:   rgba(10, 15, 28, 0.75); /* Translucent panel */
+  --bg-card:    rgba(17, 24, 39, 0.6);
+  --bg-hover:   rgba(31, 41, 55, 0.8);
+  
+  --border-dim: rgba(56, 182, 245, 0.15);
+  --border-lit: rgba(56, 182, 245, 0.4);
+  
+  --accent:     #00f0ff; /* Neon Cyan */
+  --accent-dim: rgba(0, 240, 255, 0.2);
+  --accent2:    #0080ff; /* Deep Blue */
+  
+  --green:      #00ff9d;
+  --red:        #ff3366;
+  --orange:     #ff9900;
+  --yellow:     #ffd700;
+  --purple:     #b829ff;
+  
+  --tx-primary: #f8fafc;
+  --tx-sec:     #94a3b8;
+  --tx-muted:   #475569;
+  
+  --font-head:  'Rajdhani', sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+  --font-body:  'Inter', sans-serif;
+  
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  
+  --shadow-glow: 0 0 20px rgba(0, 240, 255, 0.15);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+  
+  --glass-blur: blur(16px);
 }
 
-/* ═══════════════════ RESET ═══════════════════ */
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;overflow:hidden;}
-body{
-  background:var(--bg);
-  color:var(--tx1);
-  font-family:var(--body);
-  font-size:14px;
-  -webkit-tap-highlight-color:transparent;
+/* ═══════════════════ RESET & GLOBAL ═══════════════════ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; background-color: var(--bg-base); }
+
+body {
+  color: var(--tx-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  -webkit-tap-highlight-color: transparent;
+  /* Premium radial gradient background */
+  background: radial-gradient(circle at 50% 0%, #0d1a33 0%, var(--bg-base) 60%);
 }
 
-/* Subtle scanline overlay */
-body::after{
-  content:'';
-  position:fixed;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(56,182,245,.008) 3px,rgba(56,182,245,.008) 4px);
-  pointer-events:none;z-index:9999;
+/* Elegant Tech Grid Overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none; z-index: 0;
 }
 
 /* ═══════════════════ LAYOUT ═══════════════════ */
-#app{
-  display:flex;flex-direction:column;
-  height:100dvh;height:100vh;
-  overflow:hidden;
+#app {
+  display: flex; flex-direction: column;
+  height: 100dvh; height: 100vh;
+  overflow: hidden; position: relative; z-index: 1;
 }
 
-/* ═══════════════════ HEADER ═══════════════════ */
-header{
-  background:var(--bg2);
-  border-bottom:1px solid var(--border);
-  padding:0 16px;
-  height:56px;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;
-  position:relative;z-index:1100;
+/* ═══════════════════ HEADER (GLASSMORPHISM) ═══════════════════ */
+header {
+  background: var(--bg-glass);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-dim);
+  padding: 0 20px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; position: relative; z-index: 1100;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
-header::after{
-  content:'';
-  position:absolute;bottom:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--accent),transparent);
-  opacity:.5;
-}
-.logo{display:flex;align-items:center;gap:10px;}
-.logo-hex{
-  width:34px;height:34px;
-  background:linear-gradient(135deg,var(--accent2),var(--accent));
-  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;color:#fff;flex-shrink:0;
-}
-.logo-name{font-family:var(--head);font-size:18px;font-weight:800;letter-spacing:2px;color:var(--accent);}
-.logo-sub{font-family:var(--mono);font-size:8px;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px;}
 
-.hdr-center{display:flex;align-items:center;gap:6px;}
-.online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
-.hdr-status{font-family:var(--mono);font-size:9px;color:var(--tx3);letter-spacing:1px;display:none;}
+header::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.8;
+}
 
-.hdr-right{display:flex;align-items:center;gap:10px;}
-.hdr-clock{font-family:var(--mono);font-size:10px;color:var(--accent);text-align:right;line-height:1.5;}
-.hdr-alert-btn{
-  position:relative;
-  width:32px;height:32px;background:var(--bg3);border:1px solid var(--border);
-  border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:14px;color:var(--tx2);transition:all .2s;
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-hex {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: #fff; flex-shrink: 0;
+  box-shadow: var(--shadow-glow);
 }
-.hdr-alert-btn:hover{border-color:var(--accent);color:var(--accent);}
-.notif-badge{
-  position:absolute;top:-4px;right:-4px;
-  width:16px;height:16px;border-radius:50%;background:var(--red);
-  font-family:var(--mono);font-size:8px;color:#fff;
-  display:none;align-items:center;justify-content:center;
+.logo-name {
+  font-family: var(--font-head); font-size: 24px; font-weight: 700;
+  letter-spacing: 3px; color: transparent;
+  background: linear-gradient(to right, #fff, var(--accent));
+  -webkit-background-clip: text;
 }
-.notif-badge.show{display:flex;}
-.admin-indicator{
-  display:none;align-items:center;gap:6px;
-  background:rgba(56,182,245,.1);border:1px solid rgba(56,182,245,.3);
-  border-radius:20px;padding:4px 10px;
-  font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:1px;
+.logo-sub {
+  font-family: var(--font-mono); font-size: 9px; color: var(--accent);
+  letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; opacity: 0.8;
 }
-.admin-indicator.show{display:flex;}
-.admin-logout{
-  cursor:pointer;color:var(--tx3);background:none;border:none;font-size:12px;
-  padding:0 0 0 6px;transition:color .2s;
-}
-.admin-logout:hover{color:var(--red);}
 
-@media(min-width:640px){
-  header{padding:0 24px;}
-  .hdr-status{display:block;}
-  .logo-name{font-size:20px;}
+.hdr-center { display: flex; align-items: center; gap: 8px; }
+.online-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 12px var(--green); animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+.hdr-status { font-family: var(--font-mono); font-size: 10px; color: var(--tx-sec); letter-spacing: 1px; display: none; }
+
+.hdr-right { display: flex; align-items: center; gap: 16px; }
+.hdr-clock { font-family: var(--font-mono); font-size: 12px; color: var(--accent); text-align: right; line-height: 1.4; }
+.hdr-alert-btn {
+  position: relative; width: 38px; height: 38px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--tx-sec); transition: all 0.3s ease;
+}
+.hdr-alert-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); box-shadow: var(--shadow-glow); }
+.notif-badge {
+  position: absolute; top: -5px; right: -5px; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--red); box-shadow: 0 0 10px var(--red);
+  font-family: var(--font-mono); font-size: 9px; color: #fff; font-weight: bold;
+  display: none; align-items: center; justify-content: center;
+}
+.notif-badge.show { display: flex; }
+
+.admin-indicator {
+  display: none; align-items: center; gap: 8px;
+  background: rgba(0, 240, 255, 0.1); border: 1px solid var(--accent);
+  border-radius: 30px; padding: 6px 14px;
+  font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 1px;
+  box-shadow: 0 0 15px rgba(0,240,255,0.2);
+}
+.admin-indicator.show { display: flex; }
+.admin-logout { cursor: pointer; color: var(--tx-sec); background: none; border: none; font-size: 14px; padding-left: 8px; transition: color 0.2s; }
+.admin-logout:hover { color: var(--red); }
+
+@media(min-width:640px) {
+  header { padding: 0 30px; }
+  .hdr-status { display: block; }
 }
 
 /* ═══════════════════ NAV TABS ═══════════════════ */
-.nav-tabs{
-  display:flex;
-  background:var(--bg2);
-  border-bottom:1px solid var(--border);
-  overflow-x:auto;
-  flex-shrink:0;
-  scrollbar-width:none;
+.nav-tabs {
+  display: flex; background: rgba(5, 10, 20, 0.8);
+  border-bottom: 1px solid var(--border-dim);
+  overflow-x: auto; flex-shrink: 0; scrollbar-width: none;
+  backdrop-filter: var(--glass-blur);
 }
-.nav-tabs::-webkit-scrollbar{display:none;}
-.nav-tab{
-  flex:1;min-width:70px;
-  padding:10px 8px;
-  font-family:var(--head);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  cursor:pointer;border:none;background:transparent;color:var(--tx3);
-  border-bottom:2px solid transparent;
-  transition:all .2s;white-space:nowrap;
-  display:flex;align-items:center;justify-content:center;gap:4px;
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tab {
+  flex: 1; min-width: 80px; padding: 14px 12px;
+  font-family: var(--font-head); font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer; border: none; background: transparent; color: var(--tx-sec);
+  border-bottom: 2px solid transparent; transition: all 0.3s ease;
+  display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;
 }
-.nav-tab:hover{color:var(--tx2);}
-.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-.nav-tab.nt-admin{color:var(--yellow);}
-.nav-tab.nt-admin.active{border-bottom-color:var(--yellow);}
-.nav-badge{
-  background:var(--red);color:#fff;
-  font-size:8px;font-family:var(--mono);
-  border-radius:8px;padding:1px 4px;
-  display:none;
+.nav-tab::before { /* Hover glow effect */
+  content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 0; height: 2px; background: var(--accent); transition: width 0.3s ease; box-shadow: 0 0 10px var(--accent);
 }
-.nav-badge.show{display:inline;}
+.nav-tab:hover { color: var(--tx-primary); }
+.nav-tab:hover::before { width: 40%; }
+.nav-tab.active { color: var(--accent); }
+.nav-tab.active::before { width: 100%; }
 
-@media(min-width:640px){
-  .nav-tab{font-size:12px;padding:11px 20px;letter-spacing:2px;}
+.nav-tab.nt-admin { color: var(--yellow); opacity: 0.7; }
+.nav-tab.nt-admin:hover, .nav-tab.nt-admin.active { opacity: 1; }
+.nav-tab.nt-admin::before { background: var(--yellow); box-shadow: 0 0 10px var(--yellow); }
+
+.nav-badge {
+  background: var(--red); color: #fff; font-size: 9px; font-family: var(--font-mono);
+  border-radius: 10px; padding: 2px 6px; box-shadow: 0 0 8px var(--red); display: none;
 }
+.nav-badge.show { display: inline-block; }
 
-/* ═══════════════════ MAIN ═══════════════════ */
-#main{flex:1;overflow:hidden;position:relative;}
+/* ═══════════════════ MAIN & PAGES ═══════════════════ */
+#main { flex: 1; overflow: hidden; position: relative; }
+.page { display: none; width: 100%; height: 100%; animation: fadeIn 0.4s ease; }
+.page.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ═══════════════════ PAGES ═══════════════════ */
-.page{display:none;width:100%;height:100%;}
-.page.active{display:flex;}
+/* ═══════════════════ MAP & SIDEBAR ═══════════════════ */
+#pg-peta { flex-direction: column; position: relative; }
+@media(min-width: 768px) { #pg-peta { flex-direction: row; } }
 
-/* ═══════════════════ PETA PAGE ═══════════════════ */
-#pg-peta{flex-direction:column;position:relative;}
-
-@media(min-width:768px){
-  #pg-peta{flex-direction:row;}
+/* Sidebar (Glassmorphism) */
+#sidebar {
+  background: var(--bg-glass); backdrop-filter: var(--glass-blur);
+  border-right: 1px solid var(--border-dim); display: flex; flex-direction: column;
+  overflow: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%; height: 40vh; border-top: 1px solid var(--border-lit); order: 2; flex-shrink: 0;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.5); border-radius: 20px 20px 0 0; z-index: 1000;
 }
-
-/* Sidebar */
-#sidebar{
-  background:var(--bg2);
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;
-  overflow:hidden;
-  transition:all .3s;
-  /* Mobile: horizontal strip at bottom */
-  width:100%;
-  height:220px;
-  border-top:1px solid var(--border);
-  order:2;
-  flex-shrink:0;
-}
-@media(min-width:768px){
-  #sidebar{
-    width:310px;height:100%;
-    order:0;border-top:none;border-right:1px solid var(--border);
+@media(min-width: 768px) {
+  #sidebar {
+    width: 360px; height: 100%; order: 0; border-top: none; border-right: 1px solid var(--border-dim);
+    box-shadow: 10px 0 40px rgba(0,0,0,0.5); border-radius: 0;
   }
-  #sidebar.closed{width:0;}
+  #sidebar.closed { width: 0; opacity: 0; }
 }
-#sb-toggle{
-  display:none;
-  position:absolute;left:310px;top:50%;transform:translateY(-50%);
-  z-index:500;width:16px;height:40px;
-  background:var(--card);border:1px solid var(--border);
-  border-left:none;border-radius:0 6px 6px 0;
-  cursor:pointer;align-items:center;justify-content:center;
-  color:var(--tx3);font-size:10px;transition:all .3s;
-}
-@media(min-width:768px){#sb-toggle{display:flex;}}
-.sb-header{
-  padding:10px 14px;border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
-.search-box{
-  width:100%;padding:8px 12px;
-  background:var(--bg3);border:1px solid var(--border);
-  color:var(--tx1);font-family:var(--body);font-size:12px;
-  border-radius:8px;outline:none;transition:border-color .2s;
-}
-.search-box:focus{border-color:var(--accent2);}
-.search-box::placeholder{color:var(--tx3);}
-.sb-section{padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
-.sb-section-label{
-  font-family:var(--head);font-size:10px;font-weight:700;
-  letter-spacing:2px;text-transform:uppercase;color:var(--tx3);
-  margin-bottom:8px;display:flex;align-items:center;gap:6px;
-}
-.sb-section-label::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px;}
-.filter-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
-@media(min-width:768px){.filter-grid{grid-template-columns:1fr 1fr;}}
-.filter-chip{
-  padding:5px 6px;border:1px solid var(--border);background:transparent;
-  color:var(--tx3);font-family:var(--mono);font-size:9px;
-  cursor:pointer;border-radius:6px;transition:all .2s;text-align:center;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.filter-chip:hover{border-color:var(--border2);color:var(--tx2);}
-.filter-chip.on{border-color:var(--accent);background:rgba(56,182,245,.1);color:var(--accent);}
-.filter-chip.fc-pembunuhan.on{border-color:var(--red);background:rgba(240,64,64,.1);color:var(--red);}
-.filter-chip.fc-pencurian.on{border-color:var(--orange);background:rgba(240,120,48,.1);color:var(--orange);}
-.filter-chip.fc-narkoba.on{border-color:var(--purple);background:rgba(168,106,240,.1);color:var(--purple);}
-.filter-chip.fc-kekerasan.on{border-color:var(--yellow);background:rgba(245,200,66,.1);color:var(--yellow);}
-.filter-chip.fc-penipuan.on{border-color:var(--green);background:rgba(34,217,142,.1);color:var(--green);}
-.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:4px;}
-@media(min-width:768px){.stats-row{grid-template-columns:repeat(2,1fr);}}
-.stat-mini{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;}
-.stat-val{font-family:var(--head);font-size:24px;font-weight:800;color:var(--accent);}
-.stat-lbl{font-family:var(--mono);font-size:9px;color:var(--tx3);margin-top:2px;text-transform:uppercase;letter-spacing:1px;}
-.stat-mini.red .stat-val{color:var(--red);}
-.stat-mini.grn .stat-val{color:var(--green);}
-.stat-mini.org .stat-val{color:var(--orange);}
-#incident-list{flex:1;overflow-y:auto;padding:10px;}
-#incident-list::-webkit-scrollbar{width:3px;}
-#incident-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.inc-card{
-  background:var(--bg3);border:1px solid var(--border);
-  border-left:3px solid var(--tx3);
-  border-radius:8px;padding:10px;margin-bottom:8px;
-  cursor:pointer;transition:all .2s;
-}
-.inc-card:hover{border-color:var(--border2);transform:translateX(2px);}
-.inc-card.ic-pembunuhan{border-left-color:var(--red);}
-.inc-card.ic-pencurian{border-left-color:var(--orange);}
-.inc-card.ic-narkoba{border-left-color:var(--purple);}
-.inc-card.ic-kekerasan{border-left-color:var(--yellow);}
-.inc-card.ic-penipuan{border-left-color:var(--green);}
-.inc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px;}
-.inc-title{font-family:var(--head);font-size:13px;font-weight:700;color:var(--tx1);flex:1;}
-.inc-loc{font-size:11px;color:var(--tx2);margin-bottom:4px;}
-.inc-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.inc-date{font-family:var(--mono);font-size:9px;color:var(--tx3);}
-.inc-empty{text-align:center;color:var(--tx3);font-size:12px;padding:20px;}
-.badge{
-  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.5px;
-  padding:2px 5px;border-radius:4px;flex-shrink:0;white-space:nowrap;
-}
-.badge-pembunuhan{background:rgba(240,64,64,.2);color:var(--red);border:1px solid var(--red);}
-.badge-pencurian{background:rgba(240,120,48,.2);color:var(--orange);border:1px solid var(--orange);}
-.badge-narkoba{background:rgba(168,106,240,.2);color:var(--purple);border:1px solid var(--purple);}
-.badge-kekerasan{background:rgba(245,200,66,.2);color:var(--yellow);border:1px solid var(--yellow);}
-.badge-penipuan{background:rgba(34,217,142,.2);color:var(--green);border:1px solid var(--green);}
-.badge-lainnya{background:rgba(122,160,192,.2);color:var(--tx2);border:1px solid var(--tx2);}
-.sev{font-family:var(--mono);font-size:8px;padding:1px 5px;border-radius:3px;}
-.sev-1{background:rgba(245,200,66,.15);color:var(--yellow);}
-.sev-2{background:rgba(240,120,48,.15);color:var(--orange);}
-.sev-3{background:rgba(240,64,64,.15);color:var(--red);}
 
-/* ═══════════════════ MAP ═══════════════════ */
-#map-wrap{flex:1;position:relative;order:1;}
-#map{width:100%;height:100%;}
-.leaflet-container{background:#060a12;font-family:var(--body);}
-.leaflet-popup-content-wrapper{
-  background:var(--bg2);border:1px solid var(--border2);
-  border-radius:10px;color:var(--tx1);box-shadow:0 8px 32px rgba(0,0,0,.7);
+#sb-toggle {
+  display: none; position: absolute; left: 360px; top: 50%; transform: translateY(-50%);
+  z-index: 500; width: 24px; height: 48px; background: var(--bg-glass); backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-dim); border-left: none; border-radius: 0 8px 8px 0;
+  cursor: pointer; align-items: center; justify-content: center; color: var(--accent);
+  font-size: 14px; transition: all 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.3);
 }
-.leaflet-popup-tip{background:var(--bg2);}
-.leaflet-popup-content{margin:14px 16px;}
-.leaflet-control-attribution{background:rgba(6,10,15,.8)!important;color:var(--tx3)!important;font-size:9px!important;}
-.kec-label{
-  background:transparent!important;border:none!important;box-shadow:none!important;
-  font-family:var(--head)!important;font-size:11px!important;font-weight:700!important;
-  color:rgba(56,182,245,.45)!important;letter-spacing:2px!important;text-transform:uppercase!important;
-}
-.pop-title{font-family:var(--head);font-size:15px;font-weight:700;color:var(--accent);margin-bottom:8px;}
-.pop-row{font-size:11px;color:var(--tx2);margin-bottom:3px;}
-.pop-row strong{color:var(--tx1);}
-.pop-desc{font-size:11px;color:var(--tx3);font-style:italic;margin:8px 0;padding:8px;background:var(--bg3);border-radius:6px;line-height:1.6;}
-.pop-solution{
-  font-size:10px;margin-top:8px;padding:8px 10px;
-  background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);
-  border-radius:6px;color:var(--yellow);line-height:1.6;
-}
-.pop-solution strong{color:var(--orange);}
-.pop-btns{display:flex;gap:6px;margin-top:10px;}
-.pop-btn{
-  flex:1;padding:6px 8px;background:var(--bg3);border:1px solid var(--border2);
-  color:var(--tx2);font-family:var(--mono);font-size:9px;
-  cursor:pointer;border-radius:6px;transition:all .2s;text-align:center;
-}
-.pop-btn:hover{border-color:var(--accent);color:var(--accent);}
-.pop-btn.del:hover{border-color:var(--red);color:var(--red);}
+#sb-toggle:hover { background: var(--accent-dim); color: #fff; }
+@media(min-width: 768px) { #sb-toggle { display: flex; } }
 
-/* Map overlays */
-.map-panel{
-  position:absolute;z-index:400;
-  background:rgba(11,15,23,.9);
-  border:1px solid var(--border);
-  border-radius:10px;
-  backdrop-filter:blur(8px);
+.sb-header { padding: 16px; border-bottom: 1px solid var(--border-dim); flex-shrink: 0; }
+.search-box {
+  width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-dim);
+  color: var(--tx-primary); font-family: var(--font-body); font-size: 13px;
+  border-radius: var(--radius-md); outline: none; transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
-#map-controls{top:10px;right:10px;padding:8px;display:flex;flex-direction:column;gap:6px;}
-.map-btn{
-  width:34px;height:34px;background:var(--bg3);border:1px solid var(--border);
-  color:var(--tx2);cursor:pointer;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:15px;transition:all .2s;
+.search-box:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-dim), inset 0 2px 4px rgba(0,0,0,0.2); }
+.search-box::placeholder { color: var(--tx-muted); }
+
+.sb-section { padding: 16px; border-bottom: 1px solid var(--border-dim); flex-shrink: 0; }
+.sb-section-label {
+  font-family: var(--font-head); font-size: 12px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--tx-sec);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
 }
-.map-btn:hover{border-color:var(--accent);color:var(--accent);}
-.map-btn.on{border-color:var(--green);color:var(--green);background:rgba(34,217,142,.1);}
-#map-legend{top:10px;left:10px;padding:10px 12px;max-width:120px;}
-@media(max-width:767px){#map-legend{display:none;}}
-.lg-title{font-family:var(--head);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px;}
-.lg-row{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--tx2);margin-bottom:4px;}
-.lg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-#pick-banner{
-  display:none;
-  position:absolute;bottom:70px;left:50%;transform:translateX(-50%);z-index:800;
-  background:var(--yellow);color:#111;
-  font-family:var(--head);font-size:12px;font-weight:800;letter-spacing:2px;
-  padding:8px 20px;border-radius:8px;text-transform:uppercase;white-space:nowrap;
+.sb-section-label::before { content: ''; width: 4px; height: 12px; background: var(--accent); border-radius: 2px; box-shadow: 0 0 8px var(--accent); }
+
+.filter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+@media(min-width: 768px) { .filter-grid { grid-template-columns: 1fr 1fr; } }
+.filter-chip {
+  padding: 8px; border: 1px solid var(--border-dim); background: rgba(255,255,255,0.02);
+  color: var(--tx-sec); font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  cursor: pointer; border-radius: var(--radius-sm); transition: all 0.3s; text-align: center;
 }
-#pick-banner.show{display:block;}
-#loc-panel{bottom:12px;left:10px;padding:12px 14px;}
-@media(max-width:767px){#loc-panel{display:none;}}
-.loc-title{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:2px;margin-bottom:6px;}
-.loc-val{font-family:var(--mono);font-size:10px;color:var(--tx2);line-height:1.8;}
-.loc-val span{color:var(--green);}
-#btn-share{
-  margin-top:8px;width:100%;padding:6px;
-  background:rgba(56,182,245,.1);border:1px solid rgba(56,182,245,.3);
-  color:var(--accent);font-family:var(--mono);font-size:9px;letter-spacing:1px;
-  cursor:pointer;border-radius:6px;transition:all .2s;
+.filter-chip:hover { border-color: var(--tx-sec); background: rgba(255,255,255,0.05); }
+.filter-chip.on { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); box-shadow: 0 0 10px var(--accent-dim); }
+.filter-chip.fc-pembunuhan.on { border-color: var(--red); background: rgba(255,51,102,0.15); color: var(--red); box-shadow: 0 0 10px rgba(255,51,102,0.2); }
+.filter-chip.fc-pencurian.on { border-color: var(--orange); background: rgba(255,153,0,0.15); color: var(--orange); box-shadow: 0 0 10px rgba(255,153,0,0.2); }
+.filter-chip.fc-narkoba.on { border-color: var(--purple); background: rgba(184,41,255,0.15); color: var(--purple); box-shadow: 0 0 10px rgba(184,41,255,0.2); }
+.filter-chip.fc-kekerasan.on { border-color: var(--yellow); background: rgba(255,215,0,0.15); color: var(--yellow); box-shadow: 0 0 10px rgba(255,215,0,0.2); }
+.filter-chip.fc-penipuan.on { border-color: var(--green); background: rgba(0,255,157,0.15); color: var(--green); box-shadow: 0 0 10px rgba(0,255,157,0.2); }
+
+.stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.stat-mini { background: rgba(0,0,0,0.3); border: 1px solid var(--border-dim); border-radius: var(--radius-md); padding: 12px; position: relative; overflow: hidden; }
+.stat-mini::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background: var(--accent); }
+.stat-val { font-family: var(--font-head); font-size: 28px; font-weight: 700; color: var(--tx-primary); line-height: 1; }
+.stat-lbl { font-family: var(--font-mono); font-size: 9px; color: var(--tx-sec); margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.stat-mini.red::before { background: var(--red); box-shadow: 0 0 10px var(--red); } .stat-mini.red .stat-val { color: var(--red); text-shadow: 0 0 10px rgba(255,51,102,0.4); }
+.stat-mini.grn::before { background: var(--green); box-shadow: 0 0 10px var(--green); } .stat-mini.grn .stat-val { color: var(--green); text-shadow: 0 0 10px rgba(0,255,157,0.4); }
+.stat-mini.org::before { background: var(--orange); box-shadow: 0 0 10px var(--orange); } .stat-mini.org .stat-val { color: var(--orange); text-shadow: 0 0 10px rgba(255,153,0,0.4); }
+
+#incident-list { flex: 1; overflow-y: auto; padding: 16px; scrollbar-width: thin; scrollbar-color: var(--accent) var(--bg-base); }
+#incident-list::-webkit-scrollbar { width: 4px; }
+#incident-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+.inc-card {
+  background: var(--bg-card); border: 1px solid var(--border-dim); border-left: 4px solid var(--tx-muted);
+  border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px;
+  cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative; overflow: hidden;
 }
-#btn-share:hover{background:rgba(56,182,245,.2);}
+.inc-card:hover { border-color: var(--border-lit); transform: translateY(-2px); box-shadow: var(--shadow-card); background: var(--bg-hover); }
+.inc-card.ic-pembunuhan { border-left-color: var(--red); }
+.inc-card.ic-pencurian { border-left-color: var(--orange); }
+.inc-card.ic-narkoba { border-left-color: var(--purple); }
+.inc-card.ic-kekerasan { border-left-color: var(--yellow); }
+.inc-card.ic-penipuan { border-left-color: var(--green); }
+.inc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.inc-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; color: var(--tx-primary); flex: 1; line-height: 1.2; }
+.inc-loc { font-size: 12px; color: var(--tx-sec); margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+.inc-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 6px; }
+.inc-date { font-family: var(--font-mono); font-size: 10px; color: var(--tx-sec); }
+.inc-empty { text-align: center; color: var(--tx-muted); font-size: 13px; padding: 30px 20px; font-style: italic; }
+
+.badge {
+  font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  padding: 3px 6px; border-radius: 4px; flex-shrink: 0; white-space: nowrap; text-transform: uppercase;
+}
+.badge-pembunuhan { background: rgba(255,51,102,0.15); color: var(--red); border: 1px solid rgba(255,51,102,0.3); }
+.badge-pencurian { background: rgba(255,153,0,0.15); color: var(--orange); border: 1px solid rgba(255,153,0,0.3); }
+.badge-narkoba { background: rgba(184,41,255,0.15); color: var(--purple); border: 1px solid rgba(184,41,255,0.3); }
+.badge-kekerasan { background: rgba(255,215,0,0.15); color: var(--yellow); border: 1px solid rgba(255,215,0,0.3); }
+.badge-penipuan { background: rgba(0,255,157,0.15); color: var(--green); border: 1px solid rgba(0,255,157,0.3); }
+.badge-lainnya { background: rgba(148,163,184,0.15); color: var(--tx-sec); border: 1px solid rgba(148,163,184,0.3); }
+
+.sev { font-family: var(--font-mono); font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+.sev-1 { background: rgba(255,215,0,0.1); color: var(--yellow); border: 1px solid rgba(255,215,0,0.3); }
+.sev-2 { background: rgba(255,153,0,0.1); color: var(--orange); border: 1px solid rgba(255,153,0,0.3); }
+.sev-3 { background: rgba(255,51,102,0.1); color: var(--red); border: 1px solid rgba(255,51,102,0.3); box-shadow: 0 0 8px rgba(255,51,102,0.4); }
+
+/* ═══════════════════ MAP SECTION ═══════════════════ */
+#map-wrap { flex: 1; position: relative; order: 1; height: 60vh; }
+@media(min-width: 768px) { #map-wrap { height: 100%; } }
+#map { width: 100%; height: 100%; z-index: 1; }
+
+.leaflet-container { background: #020408; font-family: var(--font-body); }
+.leaflet-popup-content-wrapper {
+  background: var(--bg-glass); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-lit);
+  border-radius: var(--radius-md); color: var(--tx-primary); box-shadow: var(--shadow-card), 0 0 20px rgba(0,240,255,0.1);
+}
+.leaflet-popup-tip { background: var(--border-lit); }
+.leaflet-popup-content { margin: 16px 20px; }
+.leaflet-control-attribution { background: rgba(0,0,0,0.7) !important; color: var(--tx-muted) !important; font-size: 10px !important; border-top-left-radius: 6px; }
+
+.kec-label {
+  background: transparent !important; border: none !important; box-shadow: none !important;
+  font-family: var(--font-head) !important; font-size: 14px !important; font-weight: 700 !important;
+  color: rgba(255,255,255,0.6) !important; letter-spacing: 4px !important; text-transform: uppercase !important;
+  text-shadow: 0 0 10px rgba(0,0,0,0.8);
+}
+
+.pop-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+.pop-row { font-size: 12px; color: var(--tx-sec); margin-bottom: 4px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;}
+.pop-row strong { color: var(--tx-primary); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; }
+.pop-desc { font-size: 12px; color: var(--tx-primary); font-style: italic; margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.4); border-left: 2px solid var(--accent); border-radius: 0 6px 6px 0; line-height: 1.6; }
+.pop-solution {
+  font-size: 11px; margin-top: 12px; padding: 10px 12px;
+  background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.3);
+  border-radius: var(--radius-sm); color: var(--tx-primary); line-height: 1.6;
+}
+.pop-solution strong { color: var(--yellow); }
+.pop-btns { display: flex; gap: 8px; margin-top: 16px; }
+.pop-btn {
+  flex: 1; padding: 8px 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-dim);
+  color: var(--tx-primary); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+  cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s; text-align: center;
+}
+.pop-btn:hover { border-color: var(--accent); color: #fff; background: var(--accent-dim); box-shadow: var(--shadow-glow); }
+.pop-btn.del:hover { border-color: var(--red); color: #fff; background: rgba(255,51,102,0.2); box-shadow: 0 0 10px var(--red); }
+
+/* Overlays on Map */
+.map-panel {
+  position: absolute; z-index: 400;
+  background: var(--bg-glass); backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-dim); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+#map-controls { top: 16px; right: 16px; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.map-btn {
+  width: 40px; height: 40px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-dim);
+  color: var(--tx-sec); cursor: pointer; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: all 0.3s;
+}
+.map-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.map-btn.on { border-color: var(--green); color: var(--green); background: rgba(0,255,157,0.1); box-shadow: 0 0 10px rgba(0,255,157,0.3); }
+
+#map-legend { top: 16px; left: 16px; padding: 14px 16px; min-width: 140px; }
+@media(max-width: 767px) { #map-legend { display: none; } }
+.lg-title { font-family: var(--font-head); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #fff; margin-bottom: 12px; border-bottom: 1px solid var(--border-dim); padding-bottom: 6px; }
+.lg-row { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--tx-primary); margin-bottom: 8px; font-family: var(--font-mono); text-transform: uppercase;}
+.lg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: inset 0 0 4px rgba(0,0,0,0.5); }
+
+#loc-panel { bottom: 20px; left: 16px; padding: 16px; border-top: 3px solid var(--accent); border-radius: 4px 4px 12px 12px; }
+@media(max-width: 767px) { #loc-panel { display: none; } }
+.loc-title { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 2px; margin-bottom: 8px; }
+.loc-val { font-family: var(--font-mono); font-size: 11px; color: var(--tx-primary); line-height: 1.8; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; margin-bottom: 10px; }
+.loc-val span { color: var(--green); text-shadow: 0 0 5px var(--green); }
+#btn-share {
+  width: 100%; padding: 8px; background: rgba(0,240,255,0.1); border: 1px solid var(--accent);
+  color: var(--accent); font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; border-radius: var(--radius-sm); transition: all 0.3s;
+}
+#btn-share:hover { background: var(--accent); color: #000; box-shadow: var(--shadow-glow); }
+
+#pick-banner {
+  display: none; position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 800;
+  background: var(--accent); color: #000; font-family: var(--font-head); font-size: 16px; font-weight: 800; letter-spacing: 3px;
+  padding: 12px 30px; border-radius: 30px; text-transform: uppercase; white-space: nowrap; box-shadow: 0 0 20px rgba(0,240,255,0.5);
+  animation: pulse-banner 1.5s infinite;
+}
+@keyframes pulse-banner { 0%,100%{transform: translateX(-50%) scale(1);} 50%{transform: translateX(-50%) scale(1.05);} }
+#pick-banner.show { display: block; }
+
+
+/* ═══════════════════ COMMON PAGE STYLES (LAPOR, STATS, ADMIN) ═══════════════════ */
+.pg-wrapper {
+  padding: 30px 20px 60px; max-width: 1200px; margin: 0 auto; width: 100%;
+}
+@media(min-width: 768px) { .pg-wrapper { padding: 40px 40px 80px; } }
+
+.pg-head { margin-bottom: 30px; position: relative; padding-bottom: 15px; }
+.pg-head::after { content:''; position:absolute; bottom:0; left:0; width:60px; height:3px; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+.pg-title { font-family: var(--font-head); font-size: 32px; font-weight: 700; letter-spacing: 2px; color: #fff; text-transform: uppercase; }
+.pg-sub { font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-top: 6px; letter-spacing: 1px; }
 
 /* ═══════════════════ LAPOR PAGE ═══════════════════ */
-#pg-lapor{
-  flex-direction:column;
-  overflow-y:auto;
-  background:var(--bg);
-  padding:20px 16px 32px;
-  -webkit-overflow-scrolling:touch;
-}
-@media(min-width:640px){#pg-lapor{padding:32px;align-items:flex-start;}}
+#pg-lapor { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-/* Out of area warning */
-#area-warning{
-  display:none;
-  background:rgba(240,120,48,.1);border:1px solid rgba(240,120,48,.3);
-  border-radius:10px;padding:14px 16px;margin-bottom:16px;
-  font-size:13px;color:var(--orange);line-height:1.6;
-}
-#area-warning.show{display:block;}
-.pg-head{margin-bottom:20px;}
-.pg-title{font-family:var(--head);font-size:22px;font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;}
-.pg-sub{font-size:12px;color:var(--tx3);margin-top:4px;}
-.lapor-info{
-  background:rgba(56,182,245,.06);border:1px solid rgba(56,182,245,.2);
-  border-radius:10px;padding:14px 16px;
-  font-size:12px;color:var(--tx2);line-height:1.7;
-  margin-bottom:20px;
-}
-.lapor-info strong{color:var(--accent);}
-.form-grid{display:grid;grid-template-columns:1fr;gap:14px;max-width:760px;}
-@media(min-width:640px){.form-grid{grid-template-columns:1fr 1fr;}}
-.fg-full{grid-column:1/-1;}
-.form-group{display:flex;flex-direction:column;gap:6px;}
-.form-lbl{font-family:var(--mono);font-size:9px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase;}
-.form-input,.form-select,.form-textarea{
-  background:var(--bg3);border:1px solid var(--border);
-  color:var(--tx1);padding:10px 14px;
-  font-family:var(--body);font-size:13px;
-  border-radius:8px;transition:border-color .2s;outline:none;
-  -webkit-appearance:none;appearance:none;
-}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent2);}
-.form-select option{background:var(--bg3);}
-.form-textarea{resize:vertical;min-height:80px;line-height:1.6;}
-.coord-row{display:flex;gap:8px;align-items:center;}
-.coord-row .form-input{flex:1;}
-.pick-btn{
-  padding:10px 12px;
-  background:rgba(34,217,142,.08);border:1px solid rgba(34,217,142,.3);
-  color:var(--green);font-family:var(--mono);font-size:9px;letter-spacing:1px;
-  cursor:pointer;border-radius:8px;transition:all .2s;white-space:nowrap;
-  flex-shrink:0;
-}
-.pick-btn:hover{background:rgba(34,217,142,.15);}
-.btn-primary{
-  padding:12px 28px;
-  background:linear-gradient(135deg,var(--accent2),var(--accent));
-  border:none;color:#051020;
-  font-family:var(--head);font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
-  cursor:pointer;border-radius:10px;transition:all .2s;
-}
-.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
-.btn-sec{
-  padding:10px 20px;background:transparent;
-  border:1px solid var(--border);color:var(--tx2);
-  font-family:var(--mono);font-size:11px;
-  cursor:pointer;border-radius:8px;transition:all .2s;
-}
-.btn-sec:hover{border-color:var(--border2);color:var(--tx1);}
-.char-count{font-family:var(--mono);font-size:9px;color:var(--tx3);text-align:right;margin-top:2px;}
+.form-card { background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-card); margin-bottom: 30px; }
+@media(min-width: 640px) { .form-card { padding: 32px; } }
 
-/* Reporter activity panel */
-.reporter-panel{
-  margin-top:20px;max-width:760px;
-  background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;
+#area-warning {
+  display: none; background: rgba(255,153,0,0.1); border: 1px solid var(--orange); border-left: 4px solid var(--orange);
+  border-radius: var(--radius-sm); padding: 16px; margin-bottom: 24px; font-size: 13px; color: var(--tx-primary); line-height: 1.6;
 }
-.reporter-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--tx1);margin-bottom:12px;letter-spacing:1px;}
-.reporter-list{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;}
-.reporter-item{
-  display:flex;align-items:flex-start;gap:10px;
-  background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;
-  font-size:11px;
+#area-warning.show { display: block; }
+.lapor-info {
+  background: rgba(0,240,255,0.05); border: 1px solid var(--border-dim); border-left: 4px solid var(--accent);
+  border-radius: var(--radius-sm); padding: 16px; font-size: 13px; color: var(--tx-primary); line-height: 1.6; margin-bottom: 24px;
 }
-.reporter-badge{flex-shrink:0;margin-top:1px;}
-.reporter-info{flex:1;min-width:0;}
-.reporter-who{font-weight:700;color:var(--tx1);margin-bottom:2px;}
-.reporter-what{color:var(--tx3);line-height:1.5;}
-.reporter-when{font-family:var(--mono);font-size:9px;color:var(--tx3);margin-top:3px;}
-.reporter-status{
-  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;
-  padding:2px 6px;border-radius:4px;flex-shrink:0;margin-top:2px;
+.lapor-info strong { color: var(--accent); }
+
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media(min-width: 640px) { .form-grid { grid-template-columns: 1fr 1fr; gap: 24px; } }
+.fg-full { grid-column: 1 / -1; }
+
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-lbl { font-family: var(--font-mono); font-size: 11px; color: var(--tx-sec); letter-spacing: 2px; text-transform: uppercase; }
+.form-input, .form-select, .form-textarea {
+  background: rgba(0,0,0,0.4); border: 1px solid var(--border-dim);
+  color: #fff; padding: 14px 16px; font-family: var(--font-body); font-size: 14px;
+  border-radius: var(--radius-sm); transition: all 0.3s; outline: none; width: 100%;
 }
-.st-pending{background:rgba(240,120,48,.2);color:var(--orange);}
-.st-approved{background:rgba(34,217,142,.2);color:var(--green);}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-dim), inset 0 2px 4px rgba(0,0,0,0.5); background: rgba(0,0,0,0.6); }
+.form-select option { background: var(--bg-base); color: #fff; }
+.form-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+.coord-row { display: flex; gap: 12px; }
+.coord-row .form-input { flex: 1; font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+.pick-btn {
+  padding: 0 20px; background: rgba(0,255,157,0.1); border: 1px solid var(--green);
+  color: var(--green); font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; border-radius: var(--radius-sm); transition: all 0.3s; white-space: nowrap; flex-shrink: 0;
+}
+.pick-btn:hover { background: var(--green); color: #000; box-shadow: 0 0 15px rgba(0,255,157,0.4); }
+
+.btn-primary {
+  padding: 16px 32px; background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border: none; color: #000; font-family: var(--font-head); font-size: 16px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  cursor: pointer; border-radius: var(--radius-md); transition: all 0.3s; box-shadow: 0 8px 20px rgba(0,240,255,0.3);
+  position: relative; overflow: hidden;
+}
+.btn-primary::after { content:''; position:absolute; top:0;left:-100%; width:50%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent); transform:skewX(-20deg); transition:all 0.5s; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(0,240,255,0.5); }
+.btn-primary:hover::after { left: 150%; }
+
+.btn-sec {
+  padding: 14px 24px; background: transparent; border: 1px solid var(--border-lit); color: var(--tx-primary);
+  font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 2px;
+  cursor: pointer; border-radius: var(--radius-md); transition: all 0.3s;
+}
+.btn-sec:hover { border-color: #fff; background: rgba(255,255,255,0.05); }
+
+/* Reporter Activity Panel */
+.reporter-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 16px; letter-spacing: 1px; display:flex; align-items:center; gap:8px;}
+.reporter-title::before{ content:''; display:inline-block; width:8px; height:8px; background:var(--accent); border-radius:50%; box-shadow:0 0 8px var(--accent);}
+.reporter-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media(min-width: 768px) { .reporter-list { grid-template-columns: 1fr 1fr; } }
+.reporter-item {
+  display: flex; align-items: flex-start; gap: 16px;
+  background: rgba(0,0,0,0.3); border: 1px solid var(--border-dim); border-radius: var(--radius-md); padding: 16px;
+  transition: all 0.3s;
+}
+.reporter-item:hover { border-color: var(--border-lit); background: rgba(255,255,255,0.02); }
+.reporter-badge { flex-shrink: 0; }
+.reporter-info { flex: 1; min-width: 0; }
+.reporter-who { font-weight: 600; color: #fff; font-size: 14px; margin-bottom: 4px; }
+.reporter-what { color: var(--tx-sec); line-height: 1.5; font-size: 13px; margin-bottom: 8px;}
+.reporter-when { font-family: var(--font-mono); font-size: 10px; color: var(--tx-muted); display:flex; justify-content:space-between; align-items:center;}
+.reporter-status { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 4px; }
+.st-pending { background: rgba(255,153,0,0.15); color: var(--orange); border: 1px solid rgba(255,153,0,0.3); }
+.st-approved { background: rgba(0,255,157,0.15); color: var(--green); border: 1px solid rgba(0,255,157,0.3); }
 
 /* ═══════════════════ STATISTIK PAGE ═══════════════════ */
-#pg-statistik{
-  flex-direction:column;overflow-y:auto;background:var(--bg);
-  padding:20px 16px 32px;
-  -webkit-overflow-scrolling:touch;
-}
-@media(min-width:640px){#pg-statistik{padding:32px;}}
-.stat-grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px;}
-@media(min-width:640px){.stat-grid2{grid-template-columns:repeat(4,1fr);}}
-.stat-card2{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;border-top:2px solid var(--border);}
-.stat-card2.a{border-top-color:var(--accent);}
-.stat-card2.r{border-top-color:var(--red);}
-.stat-card2.g{border-top-color:var(--green);}
-.stat-card2.o{border-top-color:var(--orange);}
-.sc2-val{font-family:var(--head);font-size:32px;font-weight:800;color:var(--tx1);}
-.sc2-lbl{font-size:11px;color:var(--tx3);margin-top:4px;}
-.sc2-sub{font-family:var(--mono);font-size:9px;color:var(--tx3);margin-top:4px;}
-.chart-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;}
-.chart-title{font-family:var(--head);font-size:13px;font-weight:700;color:var(--tx1);letter-spacing:1px;margin-bottom:14px;}
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.bar-lbl{font-size:10px;color:var(--tx3);width:70px;flex-shrink:0;text-align:right;}
-.bar-track{flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:4px;transition:width .5s;}
-.bar-cnt{font-family:var(--mono);font-size:10px;color:var(--tx3);width:22px;text-align:right;}
+#pg-statistik { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-/* Solution tips box */
-.tips-box{
-  background:linear-gradient(135deg,rgba(245,200,66,.05),rgba(240,120,48,.05));
-  border:1px solid rgba(245,200,66,.2);border-radius:10px;padding:16px;margin-top:16px;
-}
-.tips-title{font-family:var(--head);font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:12px;letter-spacing:1px;}
-.tip-row{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;}
-.tip-icon{font-size:16px;flex-shrink:0;}
-.tip-txt strong{font-size:12px;color:var(--tx1);}
-.tip-txt p{font-size:11px;color:var(--tx3);margin-top:2px;line-height:1.6;}
+.stat-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px; }
+@media(min-width: 768px) { .stat-grid2 { grid-template-columns: repeat(4, 1fr); gap: 24px; } }
+.stat-card2 { background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-card); position:relative; overflow:hidden;}
+.stat-card2::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; }
+.stat-card2.a::before { background: var(--accent); box-shadow: 0 0 15px var(--accent); }
+.stat-card2.r::before { background: var(--red); box-shadow: 0 0 15px var(--red); }
+.stat-card2.g::before { background: var(--green); box-shadow: 0 0 15px var(--green); }
+.stat-card2.o::before { background: var(--orange); box-shadow: 0 0 15px var(--orange); }
 
-/* ═══════════════════ ADMIN PAGE ═══════════════════ */
-#pg-admin{
-  flex-direction:column;overflow-y:auto;background:var(--bg);
-  padding:20px 16px 32px;
-  -webkit-overflow-scrolling:touch;
+.sc2-val { font-family: var(--font-head); font-size: 42px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 8px;}
+.sc2-lbl { font-family: var(--font-mono); font-size: 11px; color: var(--tx-sec); text-transform: uppercase; letter-spacing: 1px; }
+.sc2-sub { font-size: 12px; color: var(--tx-muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+.charts-layout { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 30px;}
+@media(min-width: 1024px) { .charts-layout { grid-template-columns: 1fr 1fr; } }
+.chart-section { background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-card); }
+.chart-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 1px; margin-bottom: 20px; display:flex; align-items:center; gap:8px;}
+.chart-title::before{ content:''; width:12px; height:4px; background:var(--accent); border-radius:2px; }
+
+.bar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+.bar-lbl { font-family: var(--font-mono); font-size: 11px; color: var(--tx-sec); width: 80px; flex-shrink: 0; text-align: right; text-transform: uppercase;}
+.bar-track { flex: 1; height: 12px; background: rgba(0,0,0,0.5); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);}
+.bar-fill { height: 100%; border-radius: 6px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); position:relative; overflow:hidden;}
+.bar-fill::after { content:''; position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: shimmer 2s infinite;}
+@keyframes shimmer{ 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+.bar-cnt { font-family: var(--font-head); font-size: 16px; font-weight:bold; color: #fff; width: 30px; text-align: right; }
+
+.tips-box {
+  background: rgba(255,215,0,0.03); border: 1px solid rgba(255,215,0,0.2); border-radius: var(--radius-lg); padding: 24px;
+  position:relative; overflow:hidden;
 }
-@media(min-width:640px){#pg-admin{padding:28px;}}
-.adm-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
-.adm-actions{display:flex;gap:8px;flex-wrap:wrap;}
-.adm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px;}
-@media(min-width:640px){.adm-grid{grid-template-columns:repeat(3,1fr);}}
-.adm-stat{
-  background:var(--card);border:1px solid var(--border);border-radius:10px;
-  padding:14px;border-top:2px solid var(--border);
+.tips-box::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--yellow); box-shadow:0 0 15px var(--yellow);}
+.tips-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; color: var(--yellow); margin-bottom: 20px; letter-spacing: 1px; }
+.tips-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media(min-width: 768px) { .tips-grid { grid-template-columns: 1fr 1fr; } }
+.tip-row { display: flex; gap: 16px; align-items: flex-start; background: rgba(0,0,0,0.2); padding: 16px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.02);}
+.tip-icon { font-size: 24px; flex-shrink: 0; background:rgba(255,215,0,0.1); width:48px; height:48px; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid rgba(255,215,0,0.3);}
+.tip-txt strong { font-family: var(--font-head); font-size: 16px; color: #fff; letter-spacing: 0.5px; display:block; margin-bottom:4px;}
+.tip-txt p { font-size: 13px; color: var(--tx-sec); line-height: 1.6; }
+
+/* ═══════════════════ ADMIN PAGE (HARDWARE/CONSOLE STYLE) ═══════════════════ */
+#pg-admin { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.adm-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; margin-bottom: 30px; border-bottom: 1px solid var(--border-dim); padding-bottom: 20px;}
+.adm-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.adm-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 30px; }
+@media(min-width: 768px) { .adm-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; } }
+.adm-stat {
+  background: linear-gradient(180deg, rgba(17,24,39,0.8) 0%, rgba(10,15,28,0.9) 100%);
+  border: 1px solid var(--border-dim); border-radius: var(--radius-md);
+  padding: 20px; position: relative; box-shadow: inset 0 2px 10px rgba(255,255,255,0.02), 0 4px 15px rgba(0,0,0,0.5);
 }
-.adm-stat.a{border-top-color:var(--accent);}
-.adm-stat.o{border-top-color:var(--orange);}
-.adm-stat.r{border-top-color:var(--red);}
-.adm-stat.g{border-top-color:var(--green);}
-.adm-stat-val{font-family:var(--head);font-size:30px;font-weight:800;color:var(--tx1);}
-.adm-stat-lbl{font-size:11px;color:var(--tx3);margin-top:4px;}
-.section-title{
-  font-family:var(--head);font-size:14px;font-weight:700;letter-spacing:1.5px;
-  text-transform:uppercase;color:var(--tx1);margin-bottom:12px;
-  display:flex;align-items:center;gap:8px;
+.adm-stat::after { content:''; position:absolute; top:10px; right:10px; width:6px; height:6px; border-radius:50%; }
+.adm-stat.a::after { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.adm-stat.o::after { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+.adm-stat.r::after { background: var(--red); box-shadow: 0 0 8px var(--red); }
+.adm-stat.g::after { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.adm-stat-val { font-family: var(--font-mono); font-size: 32px; font-weight: 700; color: var(--accent); text-shadow: 0 0 10px rgba(0,240,255,0.3); }
+.adm-stat-lbl { font-family: var(--font-body); font-size: 12px; color: var(--tx-sec); margin-top: 8px; text-transform: uppercase; letter-spacing: 1px;}
+
+.section-title {
+  font-family: var(--font-mono); font-size: 14px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--tx-primary); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
 }
-.section-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px;flex-shrink:0;}
-.tbl-wrap{overflow-x:auto;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:24px;}
-.adm-tbl{width:100%;border-collapse:collapse;font-size:12px;min-width:600px;}
-.adm-tbl th{
-  padding:10px 12px;text-align:left;
-  font-family:var(--mono);font-size:9px;color:var(--tx3);
-  letter-spacing:1.5px;text-transform:uppercase;
-  border-bottom:1px solid var(--border);background:var(--bg3);
+.section-title::before { content: '■'; color: var(--accent); text-shadow: 0 0 8px var(--accent); font-size: 18px;}
+
+/* Admin Tables */
+.tbl-wrap {
+  overflow-x: auto; background: rgba(5,10,20,0.9); border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md); margin-bottom: 40px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
 }
-.adm-tbl td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--tx2);vertical-align:middle;}
-.adm-tbl tr:hover td{background:var(--bg3);}
-.tbl-empty{text-align:center;color:var(--tx3);padding:20px;}
-.action-cell{display:flex;gap:6px;}
-.btn-edit2{
-  padding:4px 8px;background:rgba(56,182,245,.1);border:1px solid var(--accent2);
-  color:var(--accent);font-family:var(--mono);font-size:9px;
-  cursor:pointer;border-radius:5px;transition:all .2s;
+.adm-tbl { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; text-align: left;}
+.adm-tbl th {
+  padding: 16px; background: rgba(0,0,0,0.6);
+  font-family: var(--font-mono); font-size: 10px; color: var(--accent);
+  letter-spacing: 2px; text-transform: uppercase; border-bottom: 2px solid var(--border-dim);
 }
-.btn-edit2:hover{background:rgba(56,182,245,.2);}
-.btn-danger2{
-  padding:4px 8px;background:rgba(240,64,64,.1);border:1px solid var(--red);
-  color:var(--red);font-family:var(--mono);font-size:9px;
-  cursor:pointer;border-radius:5px;transition:all .2s;
+.adm-tbl td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--tx-primary); vertical-align: middle; }
+.adm-tbl tr { transition: background 0.2s; }
+.adm-tbl tr:hover td { background: rgba(0,240,255,0.03); }
+.tbl-empty { text-align: center; color: var(--tx-muted); padding: 40px !important; font-style: italic; font-family: var(--font-mono);}
+
+.action-cell { display: flex; gap: 8px; }
+.btn-action {
+  width: 32px; height: 32px; display:flex; align-items:center; justify-content:center;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border-dim);
+  font-family: var(--font-mono); font-size: 14px; cursor: pointer; border-radius: 6px; transition: all 0.2s;
 }
-.btn-danger2:hover{background:rgba(240,64,64,.2);}
-.btn-success2{
-  padding:4px 8px;background:rgba(34,217,142,.1);border:1px solid var(--green);
-  color:var(--green);font-family:var(--mono);font-size:9px;
-  cursor:pointer;border-radius:5px;transition:all .2s;
+.btn-action.edit:hover { border-color: var(--accent); color: #000; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+.btn-action.del:hover { border-color: var(--red); color: #fff; background: rgba(255,51,102,0.8); box-shadow: 0 0 10px var(--red); }
+.btn-action.ok:hover { border-color: var(--green); color: #000; background: var(--green); box-shadow: 0 0 10px var(--green); }
+
+.adm-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; padding: 16px; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border: 1px solid var(--border-dim);}
+.adm-search {
+  padding: 10px 16px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-dim);
+  color: #fff; font-family: var(--font-mono); font-size: 12px; border-radius: var(--radius-sm); outline: none; width: 250px; transition: border 0.3s;
 }
-.btn-success2:hover{background:rgba(34,217,142,.2);}
-.adm-toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
-.adm-search{
-  padding:7px 12px;background:var(--bg3);border:1px solid var(--border);
-  color:var(--tx1);font-family:var(--body);font-size:12px;
-  border-radius:8px;outline:none;width:200px;
+.adm-search:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-dim); }
+
+.who-list { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 40px; }
+@media(min-width: 768px) { .who-list { grid-template-columns: 1fr 1fr; } }
+.who-item {
+  display: flex; align-items: center; gap: 16px;
+  background: rgba(0,0,0,0.4); border: 1px solid var(--border-dim); border-radius: var(--radius-md); padding: 16px;
+  border-left: 3px solid var(--accent);
 }
-.adm-search:focus{border-color:var(--accent2);}
-.who-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
-.who-item{
-  display:flex;align-items:center;gap:10px;
-  background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;
-}
-.who-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;}
-.who-info{flex:1;font-size:12px;color:var(--tx2);}
-.who-time{font-family:var(--mono);font-size:9px;color:var(--tx3);}
+.who-info { flex: 1; font-size: 13px; color: var(--tx-sec); line-height:1.5;}
+.who-info strong { color: #fff; }
+.who-info em { color: var(--accent); font-style: normal; font-family:var(--font-mono); font-size:11px;}
+.who-time { font-family: var(--font-mono); font-size: 10px; color: var(--tx-muted); margin-top:4px;}
 
 /* ═══════════════════ TENTANG PAGE ═══════════════════ */
-#pg-tentang{
-  flex-direction:column;overflow-y:auto;background:var(--bg);
-  padding:24px 16px 40px;
-  -webkit-overflow-scrolling:touch;
-}
-@media(min-width:640px){#pg-tentang{padding:40px;}}
-.about-hero{text-align:center;margin-bottom:32px;}
-.about-logo{font-family:var(--head);font-size:36px;font-weight:800;letter-spacing:6px;color:var(--accent);}
-@media(min-width:640px){.about-logo{font-size:48px;}}
-.about-tag{font-size:13px;color:var(--tx3);margin-top:8px;max-width:500px;margin-inline:auto;line-height:1.7;}
-.about-cards{display:grid;grid-template-columns:1fr;gap:14px;max-width:800px;margin:0 auto 24px;}
-@media(min-width:640px){.about-cards{grid-template-columns:repeat(3,1fr);}}
-.about-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;}
-.about-card-icon{font-size:24px;margin-bottom:8px;}
-.about-card-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--tx1);margin-bottom:6px;}
-.about-card-desc{font-size:11px;color:var(--tx3);line-height:1.6;}
-.about-info{max-width:760px;margin:0 auto 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 24px;}
-.about-info-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--accent);margin-bottom:12px;letter-spacing:1px;}
-.about-info p{font-size:12px;color:var(--tx2);line-height:1.8;margin-bottom:8px;}
+#pg-tentang { overflow-y: auto; -webkit-overflow-scrolling: touch; text-align: center; }
 
-/* ═══════════════════ MODALS ═══════════════════ */
-.overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);
-  z-index:9000;display:none;align-items:center;justify-content:center;padding:16px;
+.about-hero { margin-bottom: 50px; padding-top: 20px;}
+.about-logo {
+  font-family: var(--font-head); font-size: 48px; font-weight: 800; letter-spacing: 8px;
+  background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; color: transparent;
+  text-shadow: 0 0 30px rgba(0,240,255,0.2); margin-bottom: 16px;
 }
-.overlay.show{display:flex;}
+@media(min-width: 640px) { .about-logo { font-size: 64px; } }
+.about-tag { font-family: var(--font-mono); font-size: 14px; color: var(--accent); max-width: 600px; margin: 0 auto; line-height: 1.6; letter-spacing: 1px;}
 
-/* Login */
-.login-card{
-  background:var(--bg2);border:1px solid var(--accent2);
-  border-radius:14px;padding:36px 28px;
-  width:100%;max-width:360px;text-align:center;position:relative;
+.about-cards { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 900px; margin: 0 auto 50px; }
+@media(min-width: 768px) { .about-cards { grid-template-columns: repeat(3, 1fr); } }
+.about-card {
+  background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: var(--radius-lg); padding: 30px 20px;
+  box-shadow: var(--shadow-card); position: relative; overflow: hidden; transition: transform 0.3s;
 }
-.login-card::before{
-  content:'';position:absolute;top:-1px;left:20%;right:20%;height:2px;
-  background:linear-gradient(90deg,transparent,var(--accent),transparent);
-}
-.login-logo{font-family:var(--head);font-size:26px;font-weight:800;letter-spacing:4px;color:var(--accent);margin-bottom:4px;}
-.login-sub{font-family:var(--mono);font-size:9px;color:var(--tx3);letter-spacing:2px;margin-bottom:28px;}
-.login-input{
-  width:100%;padding:11px 14px;margin-bottom:10px;
-  background:var(--bg3);border:1px solid var(--border);
-  color:var(--tx1);font-family:var(--mono);font-size:14px;letter-spacing:3px;
-  border-radius:8px;outline:none;text-align:center;transition:border-color .2s;
-}
-.login-input:focus{border-color:var(--accent2);}
-.login-err{font-size:12px;color:var(--red);margin-top:8px;display:none;}
-.login-footer{margin-top:16px;font-family:var(--mono);font-size:9px;color:var(--tx3);}
+.about-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: var(--shadow-glow); }
+.about-card::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:40px; height:3px; background:var(--accent); border-radius:3px; }
+.about-card-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.9;}
+.about-card-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: 1px;}
+.about-card-desc { font-size: 13px; color: var(--tx-sec); line-height: 1.6; }
 
-/* Edit modal */
-.modal-card{
-  background:var(--bg2);border:1px solid var(--border2);
-  border-radius:12px;padding:24px;
-  width:100%;max-width:540px;
-  max-height:90vh;overflow-y:auto;
-}
-.modal-title{font-family:var(--head);font-size:16px;font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:18px;}
-.modal-grid{display:grid;grid-template-columns:1fr;gap:12px;}
-@media(min-width:480px){.modal-grid{grid-template-columns:1fr 1fr;}}
-.modal-grid .fg-full{grid-column:1/-1;}
-.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+.about-info-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 900px; margin: 0 auto; text-align: left;}
+@media(min-width: 768px) { .about-info-grid { grid-template-columns: 2fr 1fr; } }
+.about-info { background: rgba(0,0,0,0.4); border: 1px solid var(--border-dim); border-radius: var(--radius-lg); padding: 30px; }
+.about-info-title { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 20px; letter-spacing: 2px; display:flex; align-items:center; gap:10px;}
+.about-info-title::before { content:'\2B22'; font-size:18px;}
+.about-info p { font-size: 14px; color: var(--tx-sec); line-height: 1.8; margin-bottom: 12px; }
 
-/* ═══════════════════ TOAST ═══════════════════ */
-#toast-wrap{
-  position:fixed;bottom:20px;right:16px;z-index:9999;
-  display:flex;flex-direction:column;gap:8px;align-items:flex-end;
+/* ═══════════════════ MODALS & OVERLAYS ═══════════════════ */
+.overlay {
+  position: fixed; inset: 0; background: rgba(2, 4, 10, 0.9); backdrop-filter: blur(8px);
+  z-index: 9000; display: none; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; transition: opacity 0.3s;
 }
-.toast-item{
-  background:var(--bg2);border:1px solid var(--green);
-  color:var(--green);padding:10px 16px;
-  font-family:var(--mono);font-size:11px;letter-spacing:.5px;
-  border-radius:8px;max-width:280px;
-  display:flex;align-items:center;gap:8px;
-  animation:toastIn .3s ease;box-shadow:var(--shadow);
-}
-.toast-item.t-err{border-color:var(--red);color:var(--red);}
-.toast-item.t-warn{border-color:var(--orange);color:var(--orange);}
-@keyframes toastIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.overlay.show { display: flex; opacity: 1; }
 
-/* ═══════════════════ BOOT ═══════════════════ */
-#boot{
-  position:fixed;inset:0;background:var(--bg);z-index:99999;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
-  transition:opacity .4s;
+.modal-card {
+  background: var(--bg-card); border: 1px solid var(--border-lit); border-radius: var(--radius-lg);
+  padding: 30px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05);
+  position: relative;
 }
-#boot.out{opacity:0;pointer-events:none;}
-.boot-logo{font-family:var(--head);font-size:32px;font-weight:800;letter-spacing:6px;color:var(--accent);animation:flicker 3s infinite;}
-@keyframes flicker{0%,100%{opacity:1}92%{opacity:1}94%{opacity:.5}96%{opacity:1}98%{opacity:.7}}
-.boot-sub{font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:2px;}
-.boot-bar-wrap{width:260px;height:2px;background:var(--bg3);border-radius:2px;overflow:hidden;}
-.boot-bar{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));width:0;transition:width .1s;}
-.boot-msg{font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:1px;height:14px;}
 
-/* ═══════════════════ SCROLLBAR ═══════════════════ */
-::-webkit-scrollbar{width:4px;height:4px;}
-::-webkit-scrollbar-track{background:var(--bg);}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+/* Login specific */
+.login-card { max-width: 400px; text-align: center; overflow:hidden;}
+.login-card::before { content:''; position:absolute; top:0; left:0; width:100%; height:4px; background:linear-gradient(90deg, var(--accent2), var(--accent)); }
+.login-logo { font-family: var(--font-head); font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #fff; margin-bottom: 8px; }
+.login-sub { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 3px; margin-bottom: 30px; }
+.login-input {
+  width: 100%; padding: 16px; margin-bottom: 16px; background: rgba(0,0,0,0.6); border: 1px solid var(--border-dim);
+  color: #fff; font-family: var(--font-mono); font-size: 16px; letter-spacing: 4px; border-radius: var(--radius-sm);
+  outline: none; text-align: center; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+}
+.login-input:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-dim), inset 0 2px 5px rgba(0,0,0,0.5); }
+.login-err { font-size: 12px; color: var(--red); margin-top: 12px; display: none; font-family:var(--font-mono);}
+
+/* Modal Form */
+.modal-title { font-family: var(--font-head); font-size: 24px; font-weight: 700; letter-spacing: 2px; color: #fff; text-transform: uppercase; margin-bottom: 24px; border-bottom:1px solid var(--border-dim); padding-bottom:16px;}
+.modal-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media(min-width: 480px) { .modal-grid { grid-template-columns: 1fr 1fr; } }
+.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; padding-top:20px; border-top:1px solid var(--border-dim);}
+
+/* Alerts Body */
+#alerts-body { margin-top:20px;}
+.alert-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border-dim); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; display: flex; gap: 12px; align-items: flex-start; }
+.alert-icon { font-size:20px; background:rgba(255,255,255,0.05); width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:8px;}
+
+/* ═══════════════════ TOAST (CYBERPUNK STYLE) ═══════════════════ */
+#toast-wrap { position: fixed; bottom: 30px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+.toast-item {
+  background: rgba(10, 15, 28, 0.95); border-left: 4px solid var(--accent);
+  color: #fff; padding: 14px 20px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.5px;
+  border-radius: 4px; max-width: 320px; display: flex; align-items: center; gap: 12px;
+  animation: toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+}
+.toast-item.t-err { border-color: var(--red); }
+.toast-item.t-warn { border-color: var(--orange); }
+.toast-icon { font-size:16px; }
+@keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* ═══════════════════ BOOT ANIMATION ═══════════════════ */
+#boot {
+  position: fixed; inset: 0; background: #010308; z-index: 99999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px;
+  transition: opacity 0.6s ease;
+}
+#boot::before { content:''; position:absolute; inset:0; background: radial-gradient(circle, rgba(0,240,255,0.05) 0%, transparent 50%); }
+#boot.out { opacity: 0; pointer-events: none; }
+.boot-logo { font-family: var(--font-head); font-size: 48px; font-weight: 800; letter-spacing: 10px; color: var(--accent); animation: flicker 3s infinite; text-shadow:0 0 20px var(--accent-dim);}
+@keyframes flicker { 0%,100%{opacity:1} 92%{opacity:1} 94%{opacity:0.3} 96%{opacity:1} 98%{opacity:0.5} }
+.boot-sub { font-family: var(--font-mono); font-size: 12px; color: var(--tx-sec); letter-spacing: 4px; text-transform:uppercase;}
+.boot-bar-wrap { width: 300px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; position:relative;}
+.boot-bar { height: 100%; background: linear-gradient(90deg, transparent, var(--accent), #fff); width: 0; transition: width 0.1s linear; box-shadow: 0 0 10px var(--accent);}
+.boot-msg { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; height: 16px; text-transform:uppercase;}
+
 </style>
 </head>
 <body>
@@ -672,9 +701,9 @@ header::after{
 <!-- BOOT SCREEN -->
 <div id="boot">
   <div class="boot-logo">E-KRIMMAP</div>
-  <div class="boot-sub">SISTEM ELEKTRONIK PETA RAWAN KRIMINALITAS</div>
+  <div class="boot-sub">Sistem Intelijen Peta Kriminal</div>
   <div class="boot-bar-wrap"><div class="boot-bar" id="boot-bar"></div></div>
-  <div class="boot-msg" id="boot-msg">> Memuat sistem...</div>
+  <div class="boot-msg" id="boot-msg">> INITIALIZING PROTOCOLS...</div>
 </div>
 
 <div id="app" style="display:none;">
@@ -690,17 +719,17 @@ header::after{
   </div>
   <div class="hdr-center">
     <div class="online-dot"></div>
-    <span class="hdr-status">SISTEM AKTIF · CEP &amp; PAD</span>
+    <span class="hdr-status">SISTEM AKTIF · SECURE NETWORK</span>
   </div>
   <div class="hdr-right">
     <div class="admin-indicator" id="admin-indicator">
-      <span>🔐 ADMIN</span>
+      <span>🔐 ADMIN ACCESSED</span>
       <button class="admin-logout" onclick="doLogout()" title="Logout">✕</button>
     </div>
-    <button class="hdr-alert-btn" onclick="toggleAlerts()" id="alert-btn">
+    <button class="hdr-alert-btn" onclick="toggleAlerts()" id="alert-btn" title="Notifikasi">
       🔔<span class="notif-badge" id="notif-badge">0</span>
     </button>
-    <div class="hdr-clock" id="clock">--:--<br><span style="font-size:9px;color:var(--tx3)">--/--/--</span></div>
+    <div class="hdr-clock" id="clock">--:--<br><span style="font-size:10px;color:var(--tx-sec)">--/--/--</span></div>
   </div>
 </header>
 
@@ -721,19 +750,19 @@ header::after{
     <!-- Sidebar -->
     <div id="sidebar">
       <div class="sb-header">
-        <input class="search-box" id="search-box" placeholder="🔍 Cari kejadian, lokasi..." oninput="doSearch(this.value)">
+        <input class="search-box" id="search-box" placeholder="Search coordinates, locations..." oninput="doSearch(this.value)">
       </div>
       <div class="sb-section">
         <div class="sb-section-label">Filter Kategori</div>
         <div class="filter-grid" id="filter-grid"></div>
       </div>
       <div class="sb-section">
-        <div class="sb-section-label">Statistik</div>
+        <div class="sb-section-label">Statistik Wilayah</div>
         <div class="stats-row">
-          <div class="stat-mini"><div class="stat-val" id="s-total">0</div><div class="stat-lbl">Total</div></div>
-          <div class="stat-mini red"><div class="stat-val" id="s-tinggi">0</div><div class="stat-lbl">Tinggi</div></div>
-          <div class="stat-mini org"><div class="stat-val" id="s-sedang">0</div><div class="stat-lbl">Sedang</div></div>
-          <div class="stat-mini grn"><div class="stat-val" id="s-cepu">0</div><div class="stat-lbl">Cepu</div></div>
+          <div class="stat-mini"><div class="stat-val" id="s-total">0</div><div class="stat-lbl">Total Laporan</div></div>
+          <div class="stat-mini red"><div class="stat-val" id="s-tinggi">0</div><div class="stat-lbl">Risiko Tinggi</div></div>
+          <div class="stat-mini org"><div class="stat-val" id="s-sedang">0</div><div class="stat-lbl">Risiko Sedang</div></div>
+          <div class="stat-mini grn"><div class="stat-val" id="s-cepu">0</div><div class="stat-lbl">Area Cepu</div></div>
         </div>
       </div>
       <div id="incident-list"></div>
@@ -745,174 +774,183 @@ header::after{
     <div id="map-wrap">
       <div id="map"></div>
       <div class="map-panel" id="map-legend">
-        <div class="lg-title">Legenda</div>
-        <div class="lg-row"><div class="lg-dot" style="background:var(--red)"></div>Pembunuhan</div>
-        <div class="lg-row"><div class="lg-dot" style="background:var(--orange)"></div>Pencurian</div>
-        <div class="lg-row"><div class="lg-dot" style="background:var(--purple)"></div>Narkoba</div>
-        <div class="lg-row"><div class="lg-dot" style="background:var(--yellow)"></div>Kekerasan</div>
-        <div class="lg-row"><div class="lg-dot" style="background:var(--green)"></div>Penipuan</div>
-        <div class="lg-row"><div class="lg-dot" style="background:var(--tx2)"></div>Lainnya</div>
+        <div class="lg-title">Legenda Visual</div>
+        <div class="lg-row"><div class="lg-dot" style="background:var(--red)"></div>Pembunuhan / Berat</div>
+        <div class="lg-row"><div class="lg-dot" style="background:var(--orange)"></div>Pencurian / Begal</div>
+        <div class="lg-row"><div class="lg-dot" style="background:var(--purple)"></div>Narkoba / Obat</div>
+        <div class="lg-row"><div class="lg-dot" style="background:var(--yellow)"></div>Kekerasan Fisik</div>
+        <div class="lg-row"><div class="lg-dot" style="background:var(--green)"></div>Penipuan / Siber</div>
+        <div class="lg-row"><div class="lg-dot" style="background:var(--tx-muted)"></div>Lainnya</div>
       </div>
       <div class="map-panel" id="map-controls">
-        <button class="map-btn" onclick="doLocate()" id="tool-locate" title="Lokasi Saya">📍</button>
-        <button class="map-btn" onclick="toggleHeat()" id="tool-heat" title="Heatmap">🔥</button>
-        <button class="map-btn" onclick="toggleSat()" id="tool-sat" title="Satelit">🛰</button>
-        <button class="map-btn" onclick="fitAll()" title="Fit Semua">⊡</button>
+        <button class="map-btn" onclick="doLocate()" id="tool-locate" title="Lacak Posisi Saya">📍</button>
+        <button class="map-btn" onclick="toggleHeat()" id="tool-heat" title="Analisis Heatmap">🔥</button>
+        <button class="map-btn" onclick="toggleSat()" id="tool-sat" title="Mode Citra Satelit">🛰</button>
+        <button class="map-btn" onclick="fitAll()" title="Reset Tampilan">⊡</button>
       </div>
       <div class="map-panel" id="loc-panel">
-        <div class="loc-title">◈ POSISI ANDA</div>
+        <div class="loc-title">◈ RADAR KOORDINAT</div>
         <div class="loc-val" id="loc-display">
-          LAT: <span id="loc-lat">–</span><br>
-          LNG: <span id="loc-lng">–</span><br>
-          <span id="loc-status" style="color:var(--tx3);font-size:9px">Aktifkan lokasi</span>
+          LAT: <span id="loc-lat">AWAITING SIGNAL</span><br>
+          LNG: <span id="loc-lng">AWAITING SIGNAL</span><br>
+          <span id="loc-status" style="color:var(--tx-muted);font-size:10px;margin-top:4px;display:block">Klik 📍 untuk melacak</span>
         </div>
-        <button id="btn-share" onclick="doShare()">⬡ BAGIKAN LOKASI</button>
+        <button id="btn-share" onclick="doShare()">⬡ TRANSMIT LOCATION</button>
       </div>
-      <div id="pick-banner">🎯 KLIK PETA — PILIH LOKASI KEJADIAN</div>
+      <div id="pick-banner">TARGET LOCATION — KLIK PETA UNTUK MENENTUKAN TITIK</div>
     </div>
   </div>
 
   <!-- ══ LAPOR ══ -->
   <div class="page" id="pg-lapor">
-    <div id="area-warning">
-      ⚠ <strong>Peringatan:</strong> Laporan hanya dapat dikirim untuk wilayah <strong>Kecamatan Cepu</strong> dan <strong>Kecamatan Padangan</strong>. Pilih salah satu kecamatan tersebut untuk melanjutkan.
-    </div>
-    <div class="pg-head">
-      <div class="pg-title">Lapor Kejadian</div>
-      <div class="pg-sub">Laporkan kejadian kriminal di wilayah Kecamatan Cepu atau Padangan, Kab. Blora</div>
-    </div>
-    <div class="lapor-info">
-      <strong>⚠ Penting:</strong> Laporan akan ditinjau admin sebelum ditampilkan di peta. Untuk darurat hubungi <strong>110 (Polisi)</strong> atau <strong>112</strong>. Laporan di luar wilayah Cepu/Padangan tidak akan diproses.
-    </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-lbl">Jenis Kejadian *</label>
-        <select class="form-select" id="f-kategori" onchange="checkArea()">
-          <option value="">-- Pilih Kategori --</option>
-          <option value="pencurian">Pencurian / Perampokan</option>
-          <option value="kekerasan">Kekerasan / Penganiayaan</option>
-          <option value="narkoba">Narkoba</option>
-          <option value="penipuan">Penipuan / Penggelapan</option>
-          <option value="pembunuhan">Pembunuhan / Aniaya Berat</option>
-          <option value="lainnya">Lainnya</option>
-        </select>
+    <div class="pg-wrapper">
+      <div id="area-warning">
+        ⚠ <strong>PERINGATAN SISTEM:</strong> Penerimaan laporan dibatasi eksklusif untuk yurisdiksi <strong>Kecamatan Cepu</strong> dan <strong>Kecamatan Padangan</strong>. Akses di luar zona ini akan ditolak oleh server.
       </div>
-      <div class="form-group">
-        <label class="form-lbl">Kecamatan *</label>
-        <select class="form-select" id="f-kecamatan" onchange="checkArea()">
-          <option value="">-- Pilih Kecamatan --</option>
-          <option value="cepu">Kecamatan Cepu</option>
-          <option value="padangan">Kecamatan Padangan</option>
-        </select>
+      <div class="pg-head">
+        <div class="pg-title">Input Laporan Insiden</div>
+        <div class="pg-sub">TRANSMISI DATA KEAMANAN PUBLIK — WILAYAH CEPU & PADANGAN</div>
       </div>
-      <div class="form-group fg-full">
-        <label class="form-lbl">Nama Lokasi / Alamat *</label>
-        <input type="text" class="form-input" id="f-lokasi" placeholder="Contoh: Jl. Pemuda No.10, Cepu">
+      
+      <div class="lapor-info">
+        <strong>INFO PROTOKOL:</strong> Semua transmisi laporan akan masuk tahap verifikasi intelijen (Admin) sebelum dipublikasikan di peta utama. Untuk kondisi darurat kritis (Level 3), segera hubungi Dispatcher Kepolisian di <strong>110</strong>.
       </div>
-      <div class="form-group">
-        <label class="form-lbl">Tanggal Kejadian *</label>
-        <input type="date" class="form-input" id="f-tanggal">
-      </div>
-      <div class="form-group">
-        <label class="form-lbl">Tingkat Risiko</label>
-        <select class="form-select" id="f-severity">
-          <option value="1">🟡 Rendah</option>
-          <option value="2" selected>🟠 Sedang</option>
-          <option value="3">🔴 Tinggi</option>
-        </select>
-      </div>
-      <div class="form-group fg-full">
-        <label class="form-lbl">Koordinat Lokasi (Opsional)</label>
-        <div class="coord-row">
-          <input type="text" class="form-input" id="f-lat" placeholder="Latitude" readonly>
-          <input type="text" class="form-input" id="f-lng" placeholder="Longitude" readonly>
-          <button class="pick-btn" onclick="startPickMode()">📍 Pilih Peta</button>
+
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-lbl">Klasifikasi Insiden *</label>
+            <select class="form-select" id="f-kategori" onchange="checkArea()">
+              <option value="">-- Select Category --</option>
+              <option value="pencurian">Pencurian / Perampasan</option>
+              <option value="kekerasan">Kekerasan Fisik / Penganiayaan</option>
+              <option value="narkoba">Distribusi Narkotika</option>
+              <option value="penipuan">Penipuan / Cyber Crime</option>
+              <option value="pembunuhan">Pembunuhan / Insiden Fatal</option>
+              <option value="lainnya">Lainnya (Anomali)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl">Zona Yurisdiksi *</label>
+            <select class="form-select" id="f-kecamatan" onchange="checkArea()">
+              <option value="">-- Select Zone --</option>
+              <option value="cepu">Sektor Cepu</option>
+              <option value="padangan">Sektor Padangan</option>
+            </select>
+          </div>
+          <div class="form-group fg-full">
+            <label class="form-lbl">Titik Lokasi Spesifik *</label>
+            <input type="text" class="form-input" id="f-lokasi" placeholder="Contoh: Jl. Pemuda No.10, depan minimarket...">
+          </div>
+          <div class="form-group">
+            <label class="form-lbl">Waktu Kejadian *</label>
+            <input type="date" class="form-input" id="f-tanggal">
+          </div>
+          <div class="form-group">
+            <label class="form-lbl">Estimasi Tingkat Risiko</label>
+            <select class="form-select" id="f-severity">
+              <option value="1">Level 1 - Rendah (Kuning)</option>
+              <option value="2" selected>Level 2 - Sedang (Oranye)</option>
+              <option value="3">Level 3 - Kritis (Merah)</option>
+            </select>
+          </div>
+          <div class="form-group fg-full">
+            <label class="form-lbl">Koordinat Geografis (Disarankan)</label>
+            <div class="coord-row">
+              <input type="text" class="form-input" id="f-lat" placeholder="Latitude (Opsional)" readonly>
+              <input type="text" class="form-input" id="f-lng" placeholder="Longitude (Opsional)" readonly>
+              <button class="pick-btn" onclick="startPickMode()">📍 SCAN PETA</button>
+            </div>
+          </div>
+          <div class="form-group fg-full">
+            <label class="form-lbl">Uraian Kronologi</label>
+            <textarea class="form-textarea" id="f-deskripsi" placeholder="Deskripsikan detail ciri pelaku, kerugian, atau situasi kejadian secara singkat..." maxlength="500" oninput="document.getElementById('char-count').textContent=this.value.length+'/500'"></textarea>
+            <div style="font-family:var(--font-mono); font-size:10px; color:var(--tx-muted); text-align:right; margin-top:4px;" id="char-count">0/500</div>
+          </div>
+          <div class="form-group">
+            <label class="form-lbl">Identitas Pelapor (Opsional)</label>
+            <input type="text" class="form-input" id="f-pelapor" placeholder="Nama asli atau nama samaran (Anonim)">
+          </div>
+          <div class="form-group">
+            <label class="form-lbl">Kontak Valid (Opsional)</label>
+            <input type="tel" class="form-input" id="f-telp" placeholder="08xx-xxxx-xxxx">
+          </div>
+        </div>
+        
+        <div style="display:flex; gap:16px; margin-top:30px; border-top:1px solid var(--border-dim); padding-top:24px;">
+          <button class="btn-primary" onclick="submitLaporan()">⬡ TRANSMIT DATA</button>
+          <button class="btn-sec" onclick="resetLaporan()">Clear Form</button>
         </div>
       </div>
-      <div class="form-group fg-full">
-        <label class="form-lbl">Deskripsi Kejadian</label>
-        <textarea class="form-textarea" id="f-deskripsi" placeholder="Ceritakan secara singkat..." maxlength="500" oninput="document.getElementById('char-count').textContent=this.value.length+'/500'"></textarea>
-        <div class="char-count" id="char-count">0/500</div>
-      </div>
-      <div class="form-group">
-        <label class="form-lbl">Nama Pelapor (Opsional)</label>
-        <input type="text" class="form-input" id="f-pelapor" placeholder="Nama atau Anonim">
-      </div>
-      <div class="form-group">
-        <label class="form-lbl">No. HP (Opsional)</label>
-        <input type="tel" class="form-input" id="f-telp" placeholder="08xx-xxxx-xxxx">
-      </div>
-    </div>
-    <br>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="btn-primary" onclick="submitLaporan()">⬡ KIRIM LAPORAN</button>
-      <button class="btn-sec" onclick="resetLaporan()">Reset</button>
-    </div>
 
-    <!-- Who reported list -->
-    <div class="reporter-panel" id="reporter-panel">
-      <div class="reporter-title">📋 Laporan Terakhir di Wilayah Ini</div>
-      <div class="reporter-list" id="reporter-list"></div>
+      <!-- Who reported list -->
+      <div class="form-card" style="margin-bottom:0;">
+        <div class="reporter-title">LOG AKTIVITAS MASYARAKAT</div>
+        <div class="reporter-list" id="reporter-list">
+          <!-- JS Render -->
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- ══ STATISTIK ══ -->
   <div class="page" id="pg-statistik">
-    <div class="pg-head">
-      <div class="pg-title">Statistik Kriminalitas</div>
-      <div class="pg-sub">Analisis kejadian di Kecamatan Cepu &amp; Padangan</div>
-    </div>
-    <div class="stat-grid2">
-      <div class="stat-card2 a"><div class="sc2-val" id="stb-total">0</div><div class="sc2-lbl">Total Kejadian</div><div class="sc2-sub" id="stb-hi-trend">–</div></div>
-      <div class="stat-card2 r"><div class="sc2-val" id="stb-tinggi">0</div><div class="sc2-lbl">Risiko Tinggi</div><div class="sc2-sub" id="stb-hi-pct">–</div></div>
-      <div class="stat-card2 g"><div class="sc2-val" id="stb-cepu">0</div><div class="sc2-lbl">Kec. Cepu</div><div class="sc2-sub" id="stb-cepu-pct">–</div></div>
-      <div class="stat-card2 o"><div class="sc2-val" id="stb-pad">0</div><div class="sc2-lbl">Kec. Padangan</div><div class="sc2-sub" id="stb-pad-pct">–</div></div>
-    </div>
-    <div class="chart-section">
-      <div class="chart-title">Kejadian per Kategori</div>
-      <div id="bars-wrap"></div>
-    </div>
-    <div class="chart-section">
-      <div class="chart-title">Tren Bulanan (8 Bulan Terakhir)</div>
-      <div id="timeline-wrap"></div>
-    </div>
+    <div class="pg-wrapper">
+      <div class="pg-head">
+        <div class="pg-title">Dashboard Analitik</div>
+        <div class="pg-sub">VISUALISASI DATA KRIMINALITAS & PREDIKSI POLA — CEPU & PADANGAN</div>
+      </div>
 
-    <!-- Safety Tips / Solusi Rawan Kriminal -->
-    <div class="tips-box">
-      <div class="tips-title">🛡 Solusi &amp; Jam Waspada Kriminalitas</div>
-      <div class="tip-row">
-        <div class="tip-icon">🌙</div>
-        <div class="tip-txt">
-          <strong>Jam Rawan Utama: 21.00–04.00 WIB</strong>
-          <p>Pencurian, perampokan, dan kekerasan paling sering terjadi larut malam hingga dini hari. Hindari berada di luar sendirian di jam ini, terutama di kawasan pasar dan jalan sepi.</p>
+      <div class="stat-grid2">
+        <div class="stat-card2 a"><div class="sc2-lbl">TOTAL INSIDEN</div><div class="sc2-val" id="stb-total">0</div><div class="sc2-sub" id="stb-hi-trend">System Sync</div></div>
+        <div class="stat-card2 r"><div class="sc2-lbl">LEVEL KRITIS (MERAH)</div><div class="sc2-val" id="stb-tinggi">0</div><div class="sc2-sub" id="stb-hi-pct">0% Ratio</div></div>
+        <div class="stat-card2 g"><div class="sc2-lbl">SEKTOR CEPU</div><div class="sc2-val" id="stb-cepu">0</div><div class="sc2-sub" id="stb-cepu-pct">0% Ratio</div></div>
+        <div class="stat-card2 o"><div class="sc2-lbl">SEKTOR PADANGAN</div><div class="sc2-val" id="stb-pad">0</div><div class="sc2-sub" id="stb-pad-pct">0% Ratio</div></div>
+      </div>
+
+      <div class="charts-layout">
+        <div class="chart-section">
+          <div class="chart-title">Distribusi Kategori</div>
+          <div id="bars-wrap"></div>
+        </div>
+        <div class="chart-section">
+          <div class="chart-title">Analisis Tren (8 Bulan Terakhir)</div>
+          <div id="timeline-wrap"></div>
         </div>
       </div>
-      <div class="tip-row">
-        <div class="tip-icon">🌅</div>
-        <div class="tip-txt">
-          <strong>Jam Waspada Sore: 16.00–19.00 WIB</strong>
-          <p>Jambret dan penipuan meningkat saat jam pulang kerja. Waspada di Jl. Pemuda, Jl. Ahmad Yani, dan kawasan pasar Cepu.</p>
-        </div>
-      </div>
-      <div class="tip-row">
-        <div class="tip-icon">🏠</div>
-        <div class="tip-txt">
-          <strong>Cegah Pencurian Rumah</strong>
-          <p>Pastikan kunci ganda, pasang lampu motion sensor, dan koordinasi ronda malam bersama RT/RW. Laporkan orang mencurigakan ke Polsek: 110.</p>
-        </div>
-      </div>
-      <div class="tip-row">
-        <div class="tip-icon">📱</div>
-        <div class="tip-txt">
-          <strong>Waspadai Penipuan Digital</strong>
-          <p>Jangan transfer uang ke rekening tidak dikenal. Modus arisan online, investasi emas, dan jual beli online palsu marak di wilayah ini. Verifikasi identitas sebelum transaksi.</p>
-        </div>
-      </div>
-      <div class="tip-row">
-        <div class="tip-icon">🚔</div>
-        <div class="tip-txt">
-          <strong>Kontak Darurat</strong>
-          <p>Polisi: <strong>110</strong> | Darurat: <strong>112</strong> | Polsek Cepu: Jl. Pemuda, Cepu | Polsek Padangan: Jl. Raya Padangan</p>
+
+      <!-- Safety Tips -->
+      <div class="tips-box">
+        <div class="tips-title">⚠ DIREKTIF KEAMANAN & PENCEGAHAN</div>
+        <div class="tips-grid">
+          <div class="tip-row">
+            <div class="tip-icon">🌙</div>
+            <div class="tip-txt">
+              <strong>ZONA WAKTU KRITIS: 21.00–04.00 WIB</strong>
+              <p>Puncak aktivitas pencurian dan kekerasan. Hindari rute sepi dan minim penerangan, khususnya di perbatasan kecamatan.</p>
+            </div>
+          </div>
+          <div class="tip-row">
+            <div class="tip-icon">🌅</div>
+            <div class="tip-txt">
+              <strong>WASPADA SORE: 16.00–19.00 WIB</strong>
+              <p>Tren jambret dan hipnotis meningkat bersamaan dengan jam pulang kerja/aktivitas pasar (Jl. Pemuda, Jl. Ahmad Yani).</p>
+            </div>
+          </div>
+          <div class="tip-row">
+            <div class="tip-icon">🛡️</div>
+            <div class="tip-txt">
+              <strong>PENGAMANAN ASET</strong>
+              <p>Aktifkan kunci ganda kendaraan. Nyalakan penerangan eksterior rumah. Laporkan entitas tak dikenal yang mencurigakan (110).</p>
+            </div>
+          </div>
+          <div class="tip-row">
+            <div class="tip-icon">🌐</div>
+            <div class="tip-txt">
+              <strong>SIBER & FINANSIAL</strong>
+              <p>Modus penipuan investasi dan jual-beli online sangat tinggi. Verifikasi identitas digital sebelum memproses transfer dana.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -920,91 +958,116 @@ header::after{
 
   <!-- ══ ADMIN ══ -->
   <div class="page" id="pg-admin">
-    <div class="adm-head">
+    <div class="pg-wrapper">
+      <div class="adm-head">
+        <div>
+          <div class="pg-title">Command Center</div>
+          <div class="pg-sub">OTORITAS MANAJEMEN DATA — ACCESS LEVEL: ROOT</div>
+        </div>
+        <div class="adm-actions">
+          <button class="btn-primary" onclick="showAddModal()" style="font-size:14px;padding:12px 20px">+ INSERT DATA</button>
+          <button class="btn-sec" onclick="exportJSON()">⬇ DUMP JSON</button>
+          <button class="btn-sec" onclick="exportCSV()">⬇ DUMP CSV</button>
+        </div>
+      </div>
+
+      <div class="adm-grid">
+        <div class="adm-stat a"><div class="adm-stat-val" id="a-total">0</div><div class="adm-stat-lbl">Total Database</div></div>
+        <div class="adm-stat o"><div class="adm-stat-val" id="a-pending">0</div><div class="adm-stat-lbl">Menunggu Verifikasi</div></div>
+        <div class="adm-stat r"><div class="adm-stat-val" id="a-tinggi">0</div><div class="adm-stat-lbl">Insiden Kritis</div></div>
+        <div class="adm-stat g"><div class="adm-stat-val" id="a-cepu">0</div><div class="adm-stat-lbl">Area Cepu</div></div>
+        <div class="adm-stat"><div class="adm-stat-val" id="a-padangan">0</div><div class="adm-stat-lbl">Area Padangan</div></div>
+        <div class="adm-stat"><div class="adm-stat-val" id="a-laporan">0</div><div class="adm-stat-lbl">Total Laporan Publik</div></div>
+      </div>
+
+      <div class="charts-layout" style="margin-bottom:40px;">
+        <div>
+          <div class="section-title">LIVE FEED — LAPORAN PUBLIK</div>
+          <div class="who-list" id="who-list" style="margin-bottom:0; display:flex; flex-direction:column;">
+            <div class="tbl-empty">NO ACTIVE FEEDS</div>
+          </div>
+        </div>
+        <div>
+          <!-- Laporan masuk tabel -->
+          <div class="adm-toolbar" style="margin-bottom:12px; border:none; padding:0; background:transparent;">
+            <div class="section-title" style="margin-bottom:0">VERIFICATION QUEUE</div>
+            <span id="rpt-count" style="font-family:var(--font-mono);font-size:12px;color:var(--accent)"></span>
+          </div>
+          <div class="tbl-wrap" style="margin-bottom:0;">
+            <table class="adm-tbl" id="reports-table">
+              <thead><tr>
+                <th>Tipe</th><th>Lokasi</th><th>Tgl</th><th>Source</th><th>Status</th><th>Aksi</th>
+              </tr></thead>
+              <tbody id="reports-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data kejadian -->
       <div>
-        <div class="pg-title">Panel Admin</div>
-        <div class="pg-sub">Kelola data kriminalitas wilayah Cepu &amp; Padangan</div>
-      </div>
-      <div class="adm-actions">
-        <button class="btn-primary" onclick="showAddModal()" style="font-size:12px;padding:9px 16px">+ TAMBAH</button>
-        <button class="btn-sec" onclick="exportJSON()">⬇ JSON</button>
-        <button class="btn-sec" onclick="exportCSV()">⬇ CSV</button>
-      </div>
-    </div>
-
-    <!-- Who is online -->
-    <div style="margin-bottom:20px;">
-      <div class="section-title">👁 Aktivitas Laporan Publik</div>
-      <div class="who-list" id="who-list">
-        <div style="font-size:12px;color:var(--tx3);padding:8px;">Belum ada laporan masuk</div>
-      </div>
-    </div>
-
-    <div class="adm-grid">
-      <div class="adm-stat a"><div class="adm-stat-val" id="a-total">0</div><div class="adm-stat-lbl">Total Kejadian</div></div>
-      <div class="adm-stat o"><div class="adm-stat-val" id="a-pending">0</div><div class="adm-stat-lbl">Laporan Masuk</div></div>
-      <div class="adm-stat r"><div class="adm-stat-val" id="a-tinggi">0</div><div class="adm-stat-lbl">Risiko Tinggi</div></div>
-      <div class="adm-stat g"><div class="adm-stat-val" id="a-cepu">0</div><div class="adm-stat-lbl">Kec. Cepu</div></div>
-      <div class="adm-stat"><div class="adm-stat-val" id="a-padangan">0</div><div class="adm-stat-lbl">Kec. Padangan</div></div>
-      <div class="adm-stat"><div class="adm-stat-val" id="a-laporan">0</div><div class="adm-stat-lbl">Total Laporan</div></div>
-    </div>
-
-    <!-- Laporan publik -->
-    <div>
-      <div class="adm-toolbar">
-        <div class="section-title" style="margin-bottom:0">📥 Laporan Masuk</div>
-        <span id="rpt-count" style="font-family:var(--mono);font-size:10px;color:var(--tx3)"></span>
-      </div>
-      <div class="tbl-wrap">
-        <table class="adm-tbl" id="reports-table">
-          <thead><tr>
-            <th>Kategori</th><th>Lokasi</th><th>Kecamatan</th><th>Tanggal</th><th>Pelapor</th><th>Status</th><th>Aksi</th>
-          </tr></thead>
-          <tbody id="reports-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Data kejadian -->
-    <div>
-      <div class="adm-toolbar">
-        <div class="section-title" style="margin-bottom:0">📋 Data Kejadian Terverifikasi</div>
-        <input class="adm-search" id="adm-search" placeholder="Cari..." oninput="renderAdminTable()">
-      </div>
-      <div class="tbl-wrap">
-        <table class="adm-tbl">
-          <thead><tr>
-            <th>Kategori</th><th>Judul</th><th>Lokasi</th><th>Kecamatan</th><th>Tanggal</th><th>Risiko</th><th>Aksi</th>
-          </tr></thead>
-          <tbody id="admin-tbody"></tbody>
-        </table>
+        <div class="adm-toolbar">
+          <div class="section-title" style="margin-bottom:0">MAIN DATABASE (VERIFIED)</div>
+          <input class="adm-search" id="adm-search" placeholder="Query records..." oninput="renderAdminTable()">
+        </div>
+        <div class="tbl-wrap">
+          <table class="adm-tbl">
+            <thead><tr>
+              <th>Class</th><th>Subject / Title</th><th>Location</th><th>Zone</th><th>Date</th><th>Risk</th><th>Cmd</th>
+            </tr></thead>
+            <tbody id="admin-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ══ TENTANG ══ -->
   <div class="page" id="pg-tentang">
-    <div class="about-hero">
-      <div class="about-logo">E-KRIMMAP</div>
-      <div class="about-tag">Sistem Elektronik Peta Rawan Kriminalitas — Kecamatan Cepu &amp; Padangan, Kabupaten Blora, Jawa Tengah</div>
-    </div>
-    <div class="about-cards">
-      <div class="about-card"><div class="about-card-icon">🗺</div><div class="about-card-title">Peta Interaktif</div><div class="about-card-desc">Visualisasi data kriminalitas berbasis peta dengan filter kategori, heatmap, dan mode satelit</div></div>
-      <div class="about-card"><div class="about-card-icon">📢</div><div class="about-card-title">Laporan Publik</div><div class="about-card-desc">Masyarakat Cepu &amp; Padangan dapat melaporkan kejadian langsung tanpa perlu login</div></div>
-      <div class="about-card"><div class="about-card-icon">🔐</div><div class="about-card-title">Panel Admin</div><div class="about-card-desc">Admin memverifikasi laporan, mengelola data, dan mengekspor laporan kejadian</div></div>
-    </div>
-    <div class="about-info">
-      <div class="about-info-title">⬡ Tentang Sistem</div>
-      <p>E-KRIMMAP adalah sistem informasi geografis (SIG) berbasis web untuk pemetaan daerah rawan kriminalitas di wilayah Kecamatan Cepu dan Kecamatan Padangan, Kabupaten Blora, Jawa Tengah.</p>
-      <p><strong style="color:var(--accent)">Teknologi:</strong> HTML5, CSS3, JavaScript, Leaflet.js, OpenStreetMap, localStorage API.</p>
-      <p style="color:var(--tx3);font-size:11px">Koordinat: Kec. Cepu (−7.13°LS, 111.59°BT) · Kec. Padangan (−7.10°LS, 111.50°BT)</p>
-    </div>
-    <div class="about-info">
-      <div class="about-info-title">📞 Kontak Darurat</div>
-      <p>🚔 <strong>Polisi:</strong> 110 | <strong>Darurat:</strong> 112</p>
-      <p>🚑 <strong>Ambulans:</strong> 118 | <strong>Pemadam:</strong> 113</p>
-      <p>📍 <strong>Polsek Cepu:</strong> Jl. Pemuda, Cepu, Blora</p>
-      <p>📍 <strong>Polsek Padangan:</strong> Jl. Raya Padangan, Blora</p>
+    <div class="pg-wrapper" style="max-width:1000px;">
+      <div class="about-hero">
+        <div class="about-logo">E-KRIMMAP</div>
+        <div class="about-tag">Sistem Informasi Geografis & Analitik Pemetaan Rawan Kriminalitas<br>Wilayah Hukum Kec. Cepu & Kec. Padangan</div>
+      </div>
+
+      <div class="about-cards">
+        <div class="about-card">
+          <div class="about-card-icon">🗺️</div>
+          <div class="about-card-title">Geospasial Dinamis</div>
+          <div class="about-card-desc">Visualisasi data kriminal dengan integrasi pemetaan satelit, analisis heatmap, dan filter berlapis.</div>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">📡</div>
+          <div class="about-card-title">Transmisi Publik</div>
+          <div class="about-card-desc">Sistem crowdsourcing yang memungkinkan masyarakat melapor secara realtime dan anonim.</div>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">🛡️</div>
+          <div class="about-card-title">Manajemen Otentik</div>
+          <div class="about-card-desc">Dashboard kontrol admin untuk memverifikasi keakuratan data dan memantau analitik keamanan.</div>
+        </div>
+      </div>
+
+      <div class="about-info-grid">
+        <div class="about-info">
+          <div class="about-info-title">SISTEM & TEKNOLOGI</div>
+          <p>E-KRIMMAP dibangun sebagai prototipe sistem peringatan dini dan pemetaan tindak kejahatan guna mendukung kewaspadaan masyarakat sipil dan aparat penegak hukum.</p>
+          <p><strong style="color:var(--accent)">Engine Stack:</strong> HTML5, CSS3, JS ES6, Leaflet.js, CartoDB Maps.</p>
+          <p style="color:var(--tx-muted);font-family:var(--font-mono);font-size:12px;margin-top:20px;">
+            GEO-BOUNDS CEPU: -7.13°S, 111.59°E<br>
+            GEO-BOUNDS PADANGAN: -7.10°S, 111.50°E
+          </p>
+        </div>
+        <div class="about-info" style="border-color:var(--red);">
+          <div class="about-info-title" style="color:var(--red);">PROTOKOL DARURAT</div>
+          <p style="font-family:var(--font-mono); font-size:16px; color:#fff; margin-bottom:8px;">POLISI: <span style="color:var(--red);font-weight:bold;font-size:20px;">110</span></p>
+          <p style="font-family:var(--font-mono); font-size:16px; color:#fff; margin-bottom:20px;">SOS UMUM: <span style="color:var(--orange);font-weight:bold;font-size:20px;">112</span></p>
+          <div style="font-size:12px; border-top:1px solid rgba(255,255,255,0.1); padding-top:12px;">
+            <strong style="color:var(--accent);">SEKTOR CEPU:</strong> Jl. Pemuda<br><br>
+            <strong style="color:var(--accent);">SEKTOR PADANGAN:</strong> Jl. Raya Padangan
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1013,22 +1076,26 @@ header::after{
 
 <!-- ALERTS PANEL -->
 <div class="overlay" id="alerts-panel" onclick="if(event.target===this)toggleAlerts()">
-  <div class="modal-card" style="max-width:420px;">
-    <div class="modal-title">🔔 Peringatan &amp; Laporan</div>
-    <div id="alerts-body"></div>
-    <div class="modal-actions"><button class="btn-sec" onclick="toggleAlerts()">Tutup</button></div>
+  <div class="modal-card" style="max-width:480px; padding:0;">
+    <div style="padding:24px 24px 16px; border-bottom:1px solid var(--border-dim);">
+      <div class="modal-title" style="margin:0; border:none; padding:0;">🔔 SYSTEM ALERTS</div>
+    </div>
+    <div id="alerts-body" style="padding:0 24px; max-height:60vh; overflow-y:auto; margin-top:16px;"></div>
+    <div class="modal-actions" style="padding:16px 24px; background:rgba(0,0,0,0.3); margin-top:0;">
+      <button class="btn-sec" onclick="toggleAlerts()">Close Panel</button>
+    </div>
   </div>
 </div>
 
 <!-- LOGIN OVERLAY -->
 <div class="overlay" id="login-overlay" onclick="if(event.target===this)closeLogin()">
-  <div class="login-card">
-    <div class="login-logo">E-KRIMMAP</div>
-    <div class="login-sub">ADMIN ACCESS · SECURED</div>
-    <input type="password" class="login-input" id="adm-pw" placeholder="PASSWORD" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="btn-primary" onclick="doLogin()" style="width:100%;margin-top:4px">⬡ MASUK</button>
-    <div class="login-err" id="login-err">❌ Password salah. Coba lagi.</div>
-    <button class="btn-sec" onclick="closeLogin()" style="width:100%;margin-top:8px">Batal</button>
+  <div class="modal-card login-card">
+    <div class="login-logo">ROOT ACCESS</div>
+    <div class="login-sub">E-KRIMMAP COMMAND CENTER</div>
+    <input type="password" class="login-input" id="adm-pw" placeholder="ENTER PASSPHRASE" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-primary" onclick="doLogin()" style="width:100%;margin-top:10px">AUTHORIZE</button>
+    <div class="login-err" id="login-err">ACCESS DENIED. INVALID PASSPHRASE.</div>
+    <button class="btn-sec" onclick="closeLogin()" style="width:100%;margin-top:16px; border-color:transparent;">Cancel Sequence</button>
   </div>
 </div>
 
@@ -1038,11 +1105,11 @@ header::after{
     <div class="modal-title" id="modal-title">Tambah Kejadian</div>
     <div class="modal-grid">
       <div class="form-group">
-        <label class="form-lbl">Judul *</label>
+        <label class="form-lbl">Record Title *</label>
         <input type="text" class="form-input" id="m-judul">
       </div>
       <div class="form-group">
-        <label class="form-lbl">Kategori *</label>
+        <label class="form-lbl">Class *</label>
         <select class="form-select" id="m-kategori">
           <option value="pencurian">Pencurian</option>
           <option value="kekerasan">Kekerasan</option>
@@ -1053,18 +1120,18 @@ header::after{
         </select>
       </div>
       <div class="form-group fg-full">
-        <label class="form-lbl">Lokasi / Alamat *</label>
+        <label class="form-lbl">Location String *</label>
         <input type="text" class="form-input" id="m-lokasi">
       </div>
       <div class="form-group">
-        <label class="form-lbl">Kecamatan</label>
+        <label class="form-lbl">Zone</label>
         <select class="form-select" id="m-kecamatan">
           <option value="cepu">Cepu</option>
           <option value="padangan">Padangan</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-lbl">Tanggal</label>
+        <label class="form-lbl">Timestamp</label>
         <input type="date" class="form-input" id="m-tanggal">
       </div>
       <div class="form-group">
@@ -1076,21 +1143,21 @@ header::after{
         <input type="text" class="form-input" id="m-lng" placeholder="111.59...">
       </div>
       <div class="form-group">
-        <label class="form-lbl">Risiko</label>
+        <label class="form-lbl">Risk Level</label>
         <select class="form-select" id="m-severity">
-          <option value="1">🟡 Rendah</option>
-          <option value="2">🟠 Sedang</option>
-          <option value="3">🔴 Tinggi</option>
+          <option value="1">Level 1 - Low</option>
+          <option value="2">Level 2 - Mid</option>
+          <option value="3">Level 3 - High</option>
         </select>
       </div>
       <div class="form-group fg-full">
-        <label class="form-lbl">Deskripsi</label>
-        <textarea class="form-textarea" id="m-deskripsi"></textarea>
+        <label class="form-lbl">Incident Details</label>
+        <textarea class="form-textarea" id="m-deskripsi" style="min-height:80px;"></textarea>
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn-sec" onclick="closeModal()">Batal</button>
-      <button class="btn-primary" onclick="saveModal()" style="font-size:13px;padding:10px 24px">SIMPAN</button>
+      <button class="btn-sec" onclick="closeModal()">CANCEL</button>
+      <button class="btn-primary" onclick="saveModal()" style="font-size:14px;padding:12px 24px">SAVE RECORD</button>
     </div>
   </div>
 </div>
@@ -1101,11 +1168,10 @@ header::after{
 'use strict';
 
 /* ══ CONSTANTS ══ */
-const SK='ekrimmap_v4';
-const RK='ekrimmap_rpt_v4';
+const SK='ekrimmap_v4_elegan';
+const RK='ekrimmap_rpt_v4_elegan';
 const ADMIN_PASS='admin123';
 
-// Batas wilayah Padangan & Cepu (untuk validasi laporan)
 const AREA_BOUNDS = {
   cepu:    { latMin:-7.18, latMax:-7.08, lngMin:111.55, lngMax:111.63 },
   padangan:{ latMin:-7.14, latMax:-7.06, lngMin:111.46, lngMax:111.54 }
@@ -1113,7 +1179,7 @@ const AREA_BOUNDS = {
 
 const CATS=['pembunuhan','pencurian','narkoba','kekerasan','penipuan','lainnya'];
 const CAT_LABELS={pembunuhan:'Pembunuhan',pencurian:'Pencurian',narkoba:'Narkoba',kekerasan:'Kekerasan',penipuan:'Penipuan',lainnya:'Lainnya'};
-const CAT_COLORS={pembunuhan:'#f04040',pencurian:'#f07830',narkoba:'#a86af0',kekerasan:'#f5c842',penipuan:'#22d98e',lainnya:'#7aa0c0'};
+const CAT_COLORS={pembunuhan:'#ff3366',pencurian:'#ff9900',narkoba:'#b829ff',kekerasan:'#ffd700',penipuan:'#00ff9d',lainnya:'#94a3b8'};
 const MONTHS=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
 const SEED=[
@@ -1152,18 +1218,18 @@ function saveReports(r){ localStorage.setItem(RK,JSON.stringify(r)); }
 
 /* ══ BOOT ══ */
 const BOOT_MSGS=[
-  '> Inisialisasi modul...',
-  '> Memuat basis data lokal...',
-  '> Menghubungkan OpenStreetMap...',
-  '> Memuat wilayah Cepu & Padangan...',
-  '> Sistem siap ✓',
+  '> INITIALIZING CORE PROTOCOLS...',
+  '> LOADING LOCAL DATABASE...',
+  '> CONNECTING TO SATELLITE NETWORK...',
+  '> RENDERING CEPU & PADANGAN MAP...',
+  '> SYSTEM SECURED. READY.',
 ];
 document.addEventListener('DOMContentLoaded',()=>{
   const bar=document.getElementById('boot-bar');
   const msg=document.getElementById('boot-msg');
   let pct=0, li=0;
   const iv=setInterval(()=>{
-    pct+=Math.random()*5+2;
+    pct+=Math.random()*5+3;
     if(pct>100) pct=100;
     bar.style.width=pct+'%';
     if(li<BOOT_MSGS.length && pct>li*(100/BOOT_MSGS.length)) msg.textContent=BOOT_MSGS[li++];
@@ -1175,9 +1241,9 @@ document.addEventListener('DOMContentLoaded',()=>{
         document.getElementById('app').style.flexDirection='column';
         document.getElementById('app').style.height='100%';
         initApp();
-      },350);
+      },400);
     }
-  },60);
+  },50);
 });
 
 /* ══ INIT ══ */
@@ -1192,8 +1258,8 @@ function initClock(){
   function tick(){
     const n=new Date();
     document.getElementById('clock').innerHTML=
-      n.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+'<br>'+
-      '<span style="font-size:9px;color:var(--tx3)">'+n.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'2-digit'})+'</span>';
+      n.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit', second:'2-digit'})+'<br>'+
+      '<span style="font-size:10px;color:var(--tx-muted)">'+n.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'})+'</span>';
   }
   tick(); setInterval(tick,1000);
 }
@@ -1215,17 +1281,22 @@ function switchTab(tab){
 
 /* ══ MAP ══ */
 function initMap(){
-  // Center between Cepu and Padangan
-  state.map=L.map('map',{zoomControl:false,attributionControl:true}).setView([-7.115,111.548],12);
-  state.tileN=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© <a href="https://osm.org">OpenStreetMap</a>',maxZoom:19}).addTo(state.map);
+  state.map=L.map('map',{zoomControl:false,attributionControl:true}).setView([-7.115,111.548],13);
+  
+  // ELEGANT DARK TILE LAYER (CartoDB Dark Matter)
+  state.tileN=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(state.map);
+  
   state.tileS=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:19});
   L.control.zoom({position:'bottomright'}).addTo(state.map);
 
-  // Wilayah zones
-  L.circle([-7.130,111.591],{radius:3200,color:'#38b6f5',weight:1,fillColor:'#38b6f5',fillOpacity:.04,dashArray:'6,5'}).addTo(state.map)
-    .bindTooltip('Kec. Cepu',{permanent:true,direction:'center',className:'kec-label'});
-  L.circle([-7.102,111.502],{radius:2800,color:'#22d98e',weight:1,fillColor:'#22d98e',fillOpacity:.04,dashArray:'6,5'}).addTo(state.map)
-    .bindTooltip('Kec. Padangan',{permanent:true,direction:'center',className:'kec-label'});
+  L.circle([-7.130,111.591],{radius:3200,color:'var(--accent)',weight:2,fillColor:'var(--accent)',fillOpacity:.03,dashArray:'4,6'}).addTo(state.map)
+    .bindTooltip('SEKTOR CEPU',{permanent:true,direction:'center',className:'kec-label'});
+  L.circle([-7.102,111.502],{radius:2800,color:'var(--green)',weight:2,fillColor:'var(--green)',fillOpacity:.03,dashArray:'4,6'}).addTo(state.map)
+    .bindTooltip('SEKTOR PADANGAN',{permanent:true,direction:'center',className:'kec-label'});
 
   state.map.on('click',handleMapClick);
   renderMarkers();
@@ -1234,20 +1305,18 @@ function initMap(){
 function handleMapClick(e){
   if(!state.pickMode) return;
   const {lat,lng}=e.latlng;
-  // Check if within allowed area
   const inCepu=isInArea(lat,lng,'cepu');
   const inPad=isInArea(lat,lng,'padangan');
   if(!inCepu&&!inPad){
-    showToast('⚠ Lokasi di luar wilayah Cepu/Padangan','warn'); return;
+    showToast('Lokasi di luar yurisdiksi Cepu/Padangan.','err'); return;
   }
   document.getElementById('f-lat').value=lat.toFixed(6);
   document.getElementById('f-lng').value=lng.toFixed(6);
-  // Auto-set kecamatan
   if(inCepu) document.getElementById('f-kecamatan').value='cepu';
   else document.getElementById('f-kecamatan').value='padangan';
   stopPickMode();
   switchTab('lapor');
-  showToast('📍 Koordinat dipilih: '+lat.toFixed(4)+', '+lng.toFixed(4));
+  showToast('📍 Koordinat Terkunci: '+lat.toFixed(4)+', '+lng.toFixed(4));
 }
 
 function isInArea(lat,lng,kec){
@@ -1255,14 +1324,14 @@ function isInArea(lat,lng,kec){
   return lat>=b.latMin&&lat<=b.latMax&&lng>=b.lngMin&&lng<=b.lngMax;
 }
 
-function getColor(k){return CAT_COLORS[k]||'#7aa0c0';}
+function getColor(k){return CAT_COLORS[k]||'#94a3b8';}
 
 function makeIcon(k,sev){
   const c=getColor(k);
-  const s=sev==3?22:sev==2?17:13;
-  const glow=sev==3?`box-shadow:0 0 ${s}px ${c},0 0 ${s*2}px ${c}44;`:'';
+  const s=sev==3?26:sev==2?20:16;
+  const glow=sev==3?`box-shadow:0 0 ${s}px ${c}, inset 0 0 5px rgba(0,0,0,0.8);`:'box-shadow: inset 0 0 4px rgba(0,0,0,0.8);';
   return L.divIcon({
-    html:`<div style="width:${s}px;height:${s}px;border-radius:50%;background:${c};border:2px solid rgba(255,255,255,.3);${glow}"></div>`,
+    html:`<div style="width:${s}px;height:${s}px;border-radius:50%;background:${c};border:2px solid rgba(255,255,255,.8);${glow}"></div>`,
     className:'',iconAnchor:[s/2,s/2]
   });
 }
@@ -1275,11 +1344,11 @@ function renderMarkers(){
   filtered.forEach(d=>{
     if(!d.lat||!d.lng) return;
     const mk=L.marker([d.lat,d.lng],{icon:makeIcon(d.kategori,d.severity)}).addTo(state.map);
-    mk.bindPopup(buildPopup(d),{maxWidth:280,autoPanPadding:[20,20]});
+    mk.bindPopup(buildPopup(d),{maxWidth:300,autoPanPadding:[20,20]});
     state.markers.push(mk);
     if(state.heatOn){
-      const r=(d.severity||1)*1900;
-      const hc=L.circle([d.lat,d.lng],{radius:r,color:getColor(d.kategori),fillColor:getColor(d.kategori),fillOpacity:.08,weight:0,stroke:false}).addTo(state.map);
+      const r=(d.severity||1)*1800;
+      const hc=L.circle([d.lat,d.lng],{radius:r,color:getColor(d.kategori),fillColor:getColor(d.kategori),fillOpacity:.1,weight:0,stroke:false}).addTo(state.map);
       state.heatCircles.push(hc);
     }
   });
@@ -1290,33 +1359,33 @@ function renderMarkers(){
 }
 
 function buildPopup(d){
-  const sevLabel=['','🟡 Rendah','🟠 Sedang','🔴 Tinggi'][d.severity||1];
+  const sevLabel=['','Level 1 (Rendah)','Level 2 (Sedang)','Level 3 (Kritis)'][d.severity||1];
   const solution=getSolution(d.kategori,d.severity);
   const adminBtns=state.isAdmin
-    ?`<button class="pop-btn" onclick="editItem('${d.id}')">✏ Edit</button><button class="pop-btn del" onclick="deleteItem('${d.id}')">✕ Hapus</button>`:'';
+    ?`<button class="pop-btn" onclick="editItem('${d.id}')">✏ Edit</button><button class="pop-btn del" onclick="deleteItem('${d.id}')">✕ Delete</button>`:'';
   return `
-    <div style="margin-bottom:6px"><span class="badge badge-${d.kategori}">${(d.kategori||'').toUpperCase()}</span></div>
+    <div style="margin-bottom:12px"><span class="badge badge-${d.kategori}">${(d.kategori||'').toUpperCase()}</span></div>
     <div class="pop-title">${d.judul}</div>
-    <div class="pop-row"><strong>Lokasi:</strong> ${d.lokasi}</div>
-    <div class="pop-row"><strong>Kecamatan:</strong> ${cap(d.kecamatan)}</div>
-    <div class="pop-row"><strong>Tanggal:</strong> ${d.tanggal||'–'}</div>
-    <div class="pop-row"><strong>Risiko:</strong> ${sevLabel}</div>
+    <div class="pop-row"><strong>Koordinat Lokasi:</strong> <span>${d.lokasi}</span></div>
+    <div class="pop-row"><strong>Sektor Wilayah:</strong> <span>Kec. ${cap(d.kecamatan)}</span></div>
+    <div class="pop-row"><strong>Waktu Insiden:</strong> <span>${d.tanggal||'–'}</span></div>
+    <div class="pop-row"><strong>Status Risiko:</strong> <span style="color:${d.severity==3?'var(--red)':d.severity==2?'var(--orange)':'var(--yellow)'}">${sevLabel}</span></div>
     ${d.deskripsi?`<div class="pop-desc">${d.deskripsi}</div>`:''}
-    <div class="pop-solution"><strong>⚡ Tips:</strong> ${solution}</div>
+    <div class="pop-solution"><strong>⚡ REKOMENDASI AI:</strong> ${solution}</div>
     <div class="pop-btns">
-      <button class="pop-btn" onclick="state.map.closePopup()">Tutup</button>
+      <button class="pop-btn" onclick="state.map.closePopup()">DISMISS</button>
       ${adminBtns}
     </div>`;
 }
 
 function getSolution(kat,sev){
   const tips={
-    pembunuhan:'Segera hubungi 110. Hindari kawasan ini malam hari.',
-    pencurian:'Waspada 21.00–04.00. Kunci ganda, hindari area sepi.',
-    narkoba:'Laporkan aktivitas mencurigakan ke RT/Polsek 110.',
-    kekerasan:'Hindari kerumunan malam hari. Jaga anak-anak.',
-    penipuan:'Verifikasi identitas sebelum transaksi. Jangan transfer dulu.',
-    lainnya:'Tetap waspada dan laporkan hal mencurigakan ke 110.'
+    pembunuhan:'Segera hubungi kepolisian 110. Hindari area TKP untuk tidak merusak bukti.',
+    pencurian:'Tingkatkan keamanan ganda pada aset. Evaluasi ulang penguncian rumah/kendaraan.',
+    narkoba:'Laporkan individu tak dikenal ke RT/Polsek. Hindari kontak langsung.',
+    kekerasan:'Hindari kerumunan pemicu emosi. Laporkan indikasi keributan sejak awal.',
+    penipuan:'Jangan berikan informasi OTP/KTP. Lakukan verifikasi ganda instansi.',
+    lainnya:'Tingkatkan *situational awareness*. Laporkan anomali lingkungan ke 110.'
   };
   return tips[kat]||tips.lainnya;
 }
@@ -1330,8 +1399,8 @@ function fitAll(){
 function toggleSidebar(){
   state.sbOpen=!state.sbOpen;
   document.getElementById('sidebar').classList.toggle('closed',!state.sbOpen);
-  document.getElementById('sb-toggle').textContent=state.sbOpen?'◂':'▸';
-  setTimeout(()=>state.map&&state.map.invalidateSize(),380);
+  document.getElementById('sb-toggle').innerHTML=state.sbOpen?'◂':'<span style="display:block;transform:rotate(180deg)">◂</span>';
+  setTimeout(()=>state.map&&state.map.invalidateSize(),400);
 }
 
 function initFilters(){
@@ -1364,26 +1433,26 @@ function doSearch(q){
 function renderIncidentList(data){
   const el=document.getElementById('incident-list');
   el.innerHTML='';
-  if(!data.length){el.innerHTML='<div class="inc-empty">Tidak ada data</div>';return;}
+  if(!data.length){el.innerHTML='<div class="inc-empty">NO DATA FOUND IN CURRENT FILTER</div>';return;}
   const sorted=[...data].sort((a,b)=>new Date(b.tanggal)-new Date(a.tanggal));
-  sorted.forEach((d,i)=>{
+  sorted.forEach((d)=>{
     const card=document.createElement('div');
     card.className=`inc-card ic-${d.kategori}`;
-    const sevStr=['','🟡 Rendah','🟠 Sedang','🔴 Tinggi'][d.severity||1];
+    const sevStr=['','LV 1','LV 2','LV 3'][d.severity||1];
     card.innerHTML=`
       <div class="inc-head">
         <div class="inc-title">${d.judul}</div>
-        <span class="badge badge-${d.kategori}">${(d.kategori||'').slice(0,4).toUpperCase()}</span>
+        <span class="badge badge-${d.kategori}">${(d.kategori||'').toUpperCase()}</span>
       </div>
       <div class="inc-loc">📍 ${d.lokasi}</div>
       <div class="inc-meta">
         <span class="sev sev-${d.severity||1}">${sevStr}</span>
-        <span class="inc-date">${d.tanggal||'–'}</span>
-        <span class="inc-date">${cap(d.kecamatan)}</span>
+        <span class="inc-date">📅 ${d.tanggal||'–'}</span>
+        <span class="inc-date">🗺️ Kec. ${cap(d.kecamatan)}</span>
       </div>`;
     card.onclick=()=>{
-      if(d.lat&&d.lng) state.map.flyTo([d.lat,d.lng],16,{animate:true,duration:.6});
-      switchTab('peta');
+      if(d.lat&&d.lng) state.map.flyTo([d.lat,d.lng],16,{animate:true,duration:.8});
+      if(window.innerWidth < 768) switchTab('peta');
     };
     el.appendChild(card);
   });
@@ -1400,43 +1469,49 @@ function renderBars(data){
   const cnt={};CATS.forEach(k=>cnt[k]=0);
   data.forEach(d=>{if(cnt[d.kategori]!==undefined) cnt[d.kategori]++;});
   const mx=Math.max(...Object.values(cnt),1);
-  document.getElementById('bars-wrap').innerHTML=CATS.map(k=>`
-    <div class="bar-row">
-      <div class="bar-lbl">${CAT_LABELS[k]}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(cnt[k]/mx*100).toFixed(0)}%;background:${CAT_COLORS[k]}"></div></div>
-      <div class="bar-cnt">${cnt[k]}</div>
-    </div>`).join('');
+  const wrap=document.getElementById('bars-wrap');
+  if(wrap){
+    wrap.innerHTML=CATS.map(k=>`
+      <div class="bar-row">
+        <div class="bar-lbl">${CAT_LABELS[k]}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(cnt[k]/mx*100).toFixed(0)}%;background:${CAT_COLORS[k]}"></div></div>
+        <div class="bar-cnt">${cnt[k]}</div>
+      </div>`).join('');
+  }
 }
 
 /* ══ MAP TOOLS ══ */
 function doLocate(){
-  if(!navigator.geolocation){showToast('Geolokasi tidak didukung','err');return;}
+  if(!navigator.geolocation){showToast('Geolokasi system error','err');return;}
+  document.getElementById('tool-locate').classList.add('on');
   navigator.geolocation.getCurrentPosition(pos=>{
-    const {latitude:lat,longitude:lng,accuracy:acc}=pos.coords;
+    const {latitude:lat,longitude:lng}=pos.coords;
     if(state.userMk) state.map.removeLayer(state.userMk);
     state.userMk=L.marker([lat,lng],{
       icon:L.divIcon({
-        html:`<div style="position:relative;width:18px;height:18px">
-          <div style="position:absolute;inset:0;border-radius:50%;background:rgba(34,217,142,.25);animation:pulse2 2.2s ease infinite"></div>
-          <div style="width:12px;height:12px;border-radius:50%;background:#22d98e;border:2px solid white;position:absolute;top:3px;left:3px"></div>
+        html:`<div style="position:relative;width:20px;height:20px">
+          <div style="position:absolute;inset:-10px;border-radius:50%;background:rgba(0,240,255,.2);animation:pulse2 1.5s ease-out infinite"></div>
+          <div style="width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid #000;position:absolute;top:3px;left:3px;box-shadow:0 0 10px var(--accent)"></div>
         </div>`,
-        className:'',iconAnchor:[9,9]
+        className:'',iconAnchor:[10,10]
       })
-    }).addTo(state.map).bindPopup('📍 Posisi Anda');
-    state.map.flyTo([lat,lng],16,{animate:true,duration:1});
+    }).addTo(state.map).bindPopup('<div style="font-family:var(--font-mono);font-size:12px;color:var(--accent);text-align:center">SIGNAL DETECTED<br>USER LOCATION</div>');
+    state.map.flyTo([lat,lng],16,{animate:true,duration:1.2});
     setText('loc-lat',lat.toFixed(6));
     setText('loc-lng',lng.toFixed(6));
-    setText('loc-status','✓ Lokasi aktif');
-    document.getElementById('tool-locate').classList.add('on');
-    showToast('📍 Lokasi ditemukan');
-  },()=>{showToast('Tidak bisa ambil lokasi','err');});
+    setText('loc-status','TRACKING ACTIVE');
+    showToast('RADAR LOCK: User position acquired.');
+  },()=>{
+    showToast('Failed to acquire signal','err');
+    document.getElementById('tool-locate').classList.remove('on');
+  });
 }
 
 function toggleHeat(){
   state.heatOn=!state.heatOn;
   document.getElementById('tool-heat').classList.toggle('on',state.heatOn);
   renderMarkers();
-  showToast(state.heatOn?'🔥 Heatmap aktif':'Heatmap nonaktif');
+  showToast(state.heatOn?'HEATMAP ANALYSIS ONLINE':'HEATMAP ANALYSIS OFFLINE');
 }
 
 function toggleSat(){
@@ -1444,15 +1519,15 @@ function toggleSat(){
   document.getElementById('tool-sat').classList.toggle('on',state.satMode);
   if(state.satMode){state.map.removeLayer(state.tileN);state.tileS.addTo(state.map);}
   else{state.map.removeLayer(state.tileS);state.tileN.addTo(state.map);}
-  showToast(state.satMode?'🛰 Mode satelit':'🗺 Mode peta normal');
+  showToast(state.satMode?'SATELLITE IMAGERY ENGAGED':'STANDARD VECTOR ENGAGED');
 }
 
 function doShare(){
-  if(!navigator.geolocation){showToast('Geolokasi tidak tersedia','err');return;}
+  if(!navigator.geolocation){showToast('Geolocation disabled','err');return;}
   navigator.geolocation.getCurrentPosition(pos=>{
     const url=`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
-    if(navigator.share) navigator.share({title:'Lokasi Saya — E-KRIMMAP',url});
-    else navigator.clipboard.writeText(url).then(()=>showToast('📋 Link disalin!'));
+    if(navigator.share) navigator.share({title:'My Coordinate — E-KRIMMAP',url});
+    else navigator.clipboard.writeText(url).then(()=>showToast('COORDINATE LINK COPIED'));
   });
 }
 
@@ -1461,7 +1536,6 @@ function startPickMode(){
   switchTab('peta');
   document.getElementById('pick-banner').classList.add('show');
   state.map.getContainer().style.cursor='crosshair';
-  showToast('🎯 Klik peta untuk pilih lokasi','warn');
 }
 function stopPickMode(){
   state.pickMode=false;
@@ -1471,9 +1545,7 @@ function stopPickMode(){
 
 /* ══ LAPORAN PUBLIK ══ */
 function checkArea(){
-  const kec=document.getElementById('f-kecamatan').value;
   const warn=document.getElementById('area-warning');
-  // Only show warning if a non-valid kecamatan somehow entered — here both options are valid
   warn.classList.remove('show');
 }
 
@@ -1482,14 +1554,14 @@ function submitLaporan(){
   const kec=document.getElementById('f-kecamatan').value;
   const lok=document.getElementById('f-lokasi').value.trim();
   const tgl=document.getElementById('f-tanggal').value;
-  if(!kat||!kec||!lok||!tgl){showToast('Lengkapi semua field wajib (*)','err');return;}
-  if(!kec){showToast('Pilih kecamatan (Cepu atau Padangan)','err');return;}
+  if(!kat||!kec||!lok||!tgl){showToast('Incomplete data transmission. Fill (*) fields.','err');return;}
   const lat=parseFloat(document.getElementById('f-lat').value)||null;
   const lng=parseFloat(document.getElementById('f-lng').value)||null;
-  // If coords given, validate area
+  
   if(lat&&lng&&!isInArea(lat,lng,'cepu')&&!isInArea(lat,lng,'padangan')){
-    showToast('⚠ Koordinat di luar wilayah Cepu/Padangan','warn'); return;
+    showToast('WARNING: Coordinate outside yurisdiction.','warn'); return;
   }
+  
   const rpts=loadReports();
   rpts.push({
     id:'r'+Date.now(),
@@ -1506,7 +1578,7 @@ function submitLaporan(){
   resetLaporan();
   updateHeaderAlerts();
   renderReporterList();
-  showToast('✓ Laporan dikirim! Admin akan meninjau.');
+  showToast('DATA TRANSMITTED. Awaiting verification.');
 }
 
 function resetLaporan(){
@@ -1514,27 +1586,27 @@ function resetLaporan(){
     const el=document.getElementById(id);if(el) el.value='';
   });
   document.getElementById('f-tanggal').value=new Date().toISOString().split('T')[0];
+  document.getElementById('f-severity').value="2";
   document.getElementById('char-count').textContent='0/500';
 }
 
-// Show who has reported (visible to everyone — community transparency)
 function renderReporterList(){
   const rpts=loadReports();
   const el=document.getElementById('reporter-list');
   if(!rpts.length){
-    el.innerHTML='<div style="font-size:12px;color:var(--tx3);padding:8px;">Belum ada laporan di wilayah ini.</div>';
+    el.innerHTML='<div style="font-size:12px;color:var(--tx-muted);padding:8px;font-family:var(--font-mono);font-style:italic;">NO RECENT ACTIVITY DETECTED.</div>';
     return;
   }
   const sorted=[...rpts].sort((a,b)=>new Date(b.submitted)-new Date(a.submitted));
   el.innerHTML=sorted.slice(0,8).map(r=>`
     <div class="reporter-item">
-      <div class="reporter-badge"><span class="badge badge-${r.kategori}">${(r.kategori||'').slice(0,4).toUpperCase()}</span></div>
+      <div class="reporter-badge"><span class="badge badge-${r.kategori}">${(r.kategori||'').toUpperCase()}</span></div>
       <div class="reporter-info">
-        <div class="reporter-who">${r.pelapor||'Anonim'}</div>
-        <div class="reporter-what">${r.lokasi} — ${cap(r.kecamatan)}</div>
-        <div class="reporter-when">📅 ${r.tanggal} · ${r.submitted?r.submitted.slice(0,10):''}</div>
+        <div class="reporter-who">${r.pelapor||'ANONYMOUS'}</div>
+        <div class="reporter-what">${r.lokasi} — Sektor ${cap(r.kecamatan)}</div>
+        <div class="reporter-when"><span>INCIDENT: ${r.tanggal}</span> <span>LOGGED: ${r.submitted?r.submitted.slice(0,10):''}</span></div>
       </div>
-      <div class="reporter-status ${r.status==='approved'?'st-approved':'st-pending'}">${r.status==='approved'?'TERVERIF':'PENDING'}</div>
+      <div class="reporter-status ${r.status==='approved'?'st-approved':'st-pending'}">${r.status==='approved'?'VERIFIED':'PENDING'}</div>
     </div>`).join('');
 }
 
@@ -1549,10 +1621,10 @@ function renderStatistik(){
   setText('stb-tinggi',hi);
   setText('stb-cepu',cepu);
   setText('stb-pad',pad);
-  document.getElementById('stb-hi-trend').textContent=n?'Terakhir diperbarui '+new Date().toLocaleDateString('id-ID'):'–';
-  document.getElementById('stb-hi-pct').textContent=n?Math.round(hi/n*100)+'% dari total':'–';
-  document.getElementById('stb-cepu-pct').textContent=n?Math.round(cepu/n*100)+'% dari total':'–';
-  document.getElementById('stb-pad-pct').textContent=n?Math.round(pad/n*100)+'% dari total':'–';
+  document.getElementById('stb-hi-trend').textContent=n?'Last sync: '+new Date().toLocaleDateString('id-ID'):'–';
+  document.getElementById('stb-hi-pct').textContent=n?Math.round(hi/n*100)+'% critical mass':'–';
+  document.getElementById('stb-cepu-pct').textContent=n?Math.round(cepu/n*100)+'% area volume':'–';
+  document.getElementById('stb-pad-pct').textContent=n?Math.round(pad/n*100)+'% area volume':'–';
   renderBars(data);
   renderTimeline(data);
 }
@@ -1562,8 +1634,10 @@ function renderTimeline(data){
   data.forEach(d=>{if(d.tanggal){const m=d.tanggal.slice(0,7);monthly[m]=(monthly[m]||0)+1;}});
   const keys=Object.keys(monthly).sort().slice(-8);
   const mx=Math.max(...keys.map(k=>monthly[k]),1);
-  const colors=['#38b6f5','#22d98e','#f07830','#a86af0','#f04040','#f5c842','#22d98e','#7aa0c0'];
-  document.getElementById('timeline-wrap').innerHTML=keys.map((k,i)=>{
+  const colors=['#00f0ff','#00ff9d','#ff9900','#b829ff','#ff3366','#ffd700','#00ff9d','#94a3b8'];
+  const twrap=document.getElementById('timeline-wrap');
+  if(!twrap)return;
+  twrap.innerHTML=keys.map((k,i)=>{
     const[y,mo]=k.split('-');
     const lbl=MONTHS[parseInt(mo)-1]+" '"+y.slice(2);
     return `<div class="bar-row">
@@ -1586,13 +1660,13 @@ function doLogin(){
     closeLogin();
     document.getElementById('admin-indicator').classList.add('show');
     switchTab('admin');
-    showToast('✓ Login admin berhasil');
+    showToast('AUTHORIZATION GRANTED.');
   }else{
     const e=document.getElementById('login-err');
     e.style.display='block';
     document.getElementById('adm-pw').value='';
     document.getElementById('adm-pw').focus();
-    setTimeout(()=>e.style.display='none',2800);
+    setTimeout(()=>e.style.display='none',3000);
   }
 }
 function closeLogin(){
@@ -1604,7 +1678,7 @@ function doLogout(){
   state.isAdmin=false;
   document.getElementById('admin-indicator').classList.remove('show');
   switchTab('peta');
-  showToast('Logout berhasil');
+  showToast('SESSION TERMINATED.');
 }
 
 /* ══ ADMIN ══ */
@@ -1623,16 +1697,15 @@ function renderAdminPage(){
 
 function renderWhoList(rpts){
   const el=document.getElementById('who-list');
-  if(!rpts.length){el.innerHTML='<div style="font-size:12px;color:var(--tx3);padding:8px;">Belum ada laporan masuk.</div>';return;}
+  if(!rpts.length){el.innerHTML='<div class="tbl-empty" style="padding:16px!important">NO ACTIVE FEEDS</div>';return;}
   const sorted=[...rpts].sort((a,b)=>new Date(b.submitted)-new Date(a.submitted));
-  el.innerHTML=sorted.slice(0,5).map(r=>`
+  el.innerHTML=sorted.slice(0,4).map(r=>`
     <div class="who-item">
-      <div class="who-dot"></div>
       <div class="who-info">
-        <strong>${r.pelapor||'Anonim'}</strong> melaporkan <em>${CAT_LABELS[r.kategori]||r.kategori}</em> di <strong>${r.lokasi}</strong> (${cap(r.kecamatan)})
+        <strong>${r.pelapor||'ANON'}</strong> memicu log <em>${CAT_LABELS[r.kategori]||r.kategori}</em><br>
+        📍 ${r.lokasi} (Area ${cap(r.kecamatan)})
+        <div class="who-time">TS: ${r.submitted?r.submitted.slice(0,19).replace('T',' '):r.tanggal} | STATUS: <span style="color:${r.status==='approved'?'var(--green)':'var(--orange)'}">${r.status.toUpperCase()}</span></div>
       </div>
-      <div class="who-time">${r.submitted?r.submitted.slice(0,10):r.tanggal}</div>
-      <span class="reporter-status ${r.status==='approved'?'st-approved':'st-pending'}">${r.status==='approved'?'OK':'PENDING'}</span>
     </div>`).join('');
 }
 
@@ -1640,41 +1713,43 @@ function renderAdminTable(){
   const data=loadData();
   const q=(document.getElementById('adm-search')?.value||'').toLowerCase();
   let rows=q?data.filter(d=>d.judul.toLowerCase().includes(q)||(d.lokasi||'').toLowerCase().includes(q)):data;
-  const sevStr=['','🟡','🟠','🔴'];
-  document.getElementById('admin-tbody').innerHTML=rows.map(d=>`
+  const sevStr=['','LV 1','LV 2','LV 3'];
+  const tbd=document.getElementById('admin-tbody');
+  if(!tbd)return;
+  tbd.innerHTML=rows.map(d=>`
     <tr>
-      <td><span class="badge badge-${d.kategori}">${(d.kategori||'').slice(0,4).toUpperCase()}</span></td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.judul}">${d.judul}</td>
+      <td><span class="badge badge-${d.kategori}">${(d.kategori||'').toUpperCase()}</span></td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600" title="${d.judul}">${d.judul}</td>
       <td>${d.lokasi}</td>
-      <td>${cap(d.kecamatan)}</td>
-      <td>${d.tanggal||'–'}</td>
-      <td>${sevStr[d.severity||1]}</td>
+      <td style="font-family:var(--font-mono)">${cap(d.kecamatan)}</td>
+      <td style="font-family:var(--font-mono)">${d.tanggal||'–'}</td>
+      <td style="color:${d.severity==3?'var(--red)':d.severity==2?'var(--orange)':'var(--yellow)'};font-weight:bold">${sevStr[d.severity||1]}</td>
       <td><div class="action-cell">
-        <button class="btn-edit2" onclick="editItem('${d.id}')">✏</button>
-        <button class="btn-danger2" onclick="deleteItem('${d.id}')">✕</button>
+        <button class="btn-action edit" onclick="editItem('${d.id}')" title="Edit">✏</button>
+        <button class="btn-action del" onclick="deleteItem('${d.id}')" title="Delete">✕</button>
       </div></td>
-    </tr>`).join('')||`<tr><td colspan="7" class="tbl-empty">Tidak ada data</td></tr>`;
+    </tr>`).join('')||`<tr><td colspan="7" class="tbl-empty">NO RECORDS MATCHING QUERY</td></tr>`;
 }
 
 function renderReportsTable(){
   const rpts=loadReports();
-  setText('rpt-count',rpts.length+' laporan');
-  const sevStr=['','🟡','🟠','🔴'];
-  document.getElementById('reports-tbody').innerHTML=!rpts.length
-    ?'<tr><td colspan="7" class="tbl-empty">Belum ada laporan masuk</td></tr>'
+  setText('rpt-count','['+rpts.length+' Items]');
+  const tbd=document.getElementById('reports-tbody');
+  if(!tbd)return;
+  tbd.innerHTML=!rpts.length
+    ?'<tr><td colspan="6" class="tbl-empty">NO PENDING QUEUE</td></tr>'
     :rpts.map(r=>`
       <tr>
         <td><span class="badge badge-${r.kategori}">${(r.kategori||'').slice(0,4).toUpperCase()}</span></td>
-        <td>${r.lokasi}</td>
-        <td>${cap(r.kecamatan)}</td>
-        <td>${r.tanggal}</td>
-        <td>${r.pelapor||'Anonim'}</td>
+        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.lokasi}">${r.lokasi}</td>
+        <td style="font-family:var(--font-mono)">${r.tanggal}</td>
+        <td>${r.pelapor||'ANON'}</td>
         <td style="color:${r.status==='pending'?'var(--orange)':r.status==='approved'?'var(--green)':'var(--red)'}">
-          <span style="font-family:var(--mono);font-size:10px">${r.status.toUpperCase()}</span>
+          <span style="font-family:var(--font-mono);font-size:11px;font-weight:bold">${r.status.toUpperCase()}</span>
         </td>
         <td><div class="action-cell">
-          ${r.status==='pending'?`<button class="btn-success2" onclick="approveReport('${r.id}')">✓</button>`:''}
-          <button class="btn-danger2" onclick="deleteReport('${r.id}')">✕</button>
+          ${r.status==='pending'?`<button class="btn-action ok" onclick="approveReport('${r.id}')" title="Approve">✓</button>`:''}
+          <button class="btn-action del" onclick="deleteReport('${r.id}')" title="Drop">✕</button>
         </div></td>
       </tr>`).join('');
 }
@@ -1685,25 +1760,25 @@ function approveReport(id){
   const data=loadData();
   data.push({
     id:'d'+Date.now(),
-    judul:(CAT_LABELS[rep.kategori]||rep.kategori)+' – '+rep.lokasi,
+    judul:(CAT_LABELS[rep.kategori]||rep.kategori)+' – '+rep.lokasi.split(',')[0],
     kategori:rep.kategori,lokasi:rep.lokasi,kecamatan:rep.kecamatan,
     tanggal:rep.tanggal,lat:rep.lat,lng:rep.lng,severity:rep.severity,deskripsi:rep.deskripsi
   });
   saveData(data); renderAdminPage(); renderMarkers();
-  showToast('✓ Laporan disetujui & ditambahkan ke peta');
+  showToast('RECORD VERIFIED AND MERGED.');
 }
 
 function deleteReport(id){
-  if(!confirm('Hapus laporan ini?')) return;
+  if(!confirm('DROP THIS RECORD FROM QUEUE?')) return;
   saveReports(loadReports().filter(r=>r.id!==id));
   renderAdminPage(); updateHeaderAlerts();
-  showToast('Laporan dihapus','warn');
+  showToast('RECORD DROPPED.','warn');
 }
 
 function editItem(id){
   const d=loadData().find(x=>x.id===id); if(!d) return;
   state.editId=id;
-  document.getElementById('modal-title').textContent='Edit Kejadian';
+  document.getElementById('modal-title').textContent='UPDATE RECORD';
   setValue('m-judul',d.judul||'');
   setValue('m-kategori',d.kategori||'pencurian');
   setValue('m-lokasi',d.lokasi||'');
@@ -1718,18 +1793,21 @@ function editItem(id){
 
 function showAddModal(){
   state.editId=null;
-  document.getElementById('modal-title').textContent='Tambah Kejadian Baru';
+  document.getElementById('modal-title').textContent='NEW RECORD ENTRY';
   ['m-judul','m-lokasi','m-tanggal','m-lat','m-lng','m-deskripsi'].forEach(id=>setValue(id,''));
   setValue('m-kategori','pencurian');setValue('m-kecamatan','cepu');setValue('m-severity',2);
   document.getElementById('modal-overlay').classList.add('show');
 }
 
-function closeModal(){document.getElementById('modal-overlay').classList.remove('show');state.editId=null;}
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('show');
+  state.editId=null;
+}
 
 function saveModal(){
   const judul=document.getElementById('m-judul').value.trim();
   const lokasi=document.getElementById('m-lokasi').value.trim();
-  if(!judul||!lokasi){showToast('Judul dan lokasi wajib diisi','err');return;}
+  if(!judul||!lokasi){showToast('DATA INCOMPLETE.','err');return;}
   const data=loadData();
   const item={
     id:state.editId||('d'+Date.now()),
@@ -1744,22 +1822,22 @@ function saveModal(){
   if(state.editId){const idx=data.findIndex(d=>d.id===state.editId);if(idx>-1)data[idx]=item;}
   else data.push(item);
   saveData(data);closeModal();renderAdminPage();renderMarkers();
-  showToast(state.editId?'✓ Data diperbarui':'✓ Data ditambahkan');
+  showToast(state.editId?'RECORD UPDATED.':'NEW RECORD ADDED.');
 }
 
 function deleteItem(id){
-  if(!confirm('Hapus data kejadian ini?')) return;
+  if(!confirm('ERASE RECORD FROM DATABASE?')) return;
   saveData(loadData().filter(d=>d.id!==id));
   renderAdminPage();renderMarkers();
-  showToast('Data dihapus','warn');
+  showToast('RECORD ERASED.','warn');
 }
 
 function exportJSON(){
   const data=loadData();
-  const blob=new Blob([JSON.stringify({sys:'E-KRIMMAP',exported:new Date().toISOString(),total:data.length,data},null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify({sys:'E-KRIMMAP_CORE',exported:new Date().toISOString(),total:data.length,data},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='ekrimmap_'+new Date().toISOString().slice(0,10)+'.json';a.click();
-  showToast('⬇ Data diekspor JSON');
+  a.download='ekrimmap_dump_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  showToast('JSON DUMP COMPLETED.');
 }
 
 function exportCSV(){
@@ -1769,8 +1847,8 @@ function exportCSV(){
   const csv=[header,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='ekrimmap_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
-  showToast('⬇ Data diekspor CSV');
+  a.download='ekrimmap_dump_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  showToast('CSV DUMP COMPLETED.');
 }
 
 /* ══ ALERTS ══ */
@@ -1783,7 +1861,6 @@ function updateHeaderAlerts(){
   const nb=document.getElementById('nav-badge');
   nb.textContent=cnt;
   nb.classList.toggle('show',cnt>0);
-  // Refresh alerts body if visible
   const panel=document.getElementById('alerts-panel');
   if(panel.classList.contains('show')) renderAlertsBody();
 }
@@ -1792,28 +1869,29 @@ function renderAlertsBody(){
   const rpts=loadReports().filter(r=>r.status==='pending');
   const data=loadData();
   const items=[
-    ...rpts.slice(0,4).map(r=>`
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;">
-        <span>📋</span>
-        <div style="flex:1;font-size:12px;">
-          <strong style="color:var(--tx1)">${r.lokasi}</strong><br>
-          <span style="color:var(--tx3)">${CAT_LABELS[r.kategori]||r.kategori} · ${cap(r.kecamatan)}</span><br>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--tx3)">${r.submitted?r.submitted.slice(0,10):'–'} · Pelapor: ${r.pelapor||'Anonim'}</span>
+    ...rpts.slice(0,5).map(r=>`
+      <div class="alert-item" style="border-left:4px solid var(--orange);">
+        <div class="alert-icon" style="color:var(--orange)">📡</div>
+        <div style="flex:1;font-size:13px;line-height:1.5;">
+          <strong style="color:var(--tx-primary);font-family:var(--font-head);font-size:16px;">NEW LOG: ${CAT_LABELS[r.kategori]||r.kategori}</strong><br>
+          <span style="color:var(--tx-sec)">${r.lokasi} (Area ${cap(r.kecamatan)})</span><br>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--tx-muted)">${r.submitted?r.submitted.slice(0,10):'–'} | FROM: ${r.pelapor||'ANON'}</span>
         </div>
-        <span class="reporter-status st-pending">PENDING</span>
+        <span class="reporter-status st-pending">REQ_VERIFY</span>
       </div>`),
     ...data.filter(d=>d.severity==3).slice(0,3).map(d=>`
-      <div style="background:rgba(240,64,64,.06);border:1px solid rgba(240,64,64,.2);border-radius:8px;padding:10px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;">
-        <span>🚨</span>
-        <div style="flex:1;font-size:12px;">
-          <strong style="color:var(--red)">${d.judul}</strong><br>
-          <span style="color:var(--tx3)">${d.lokasi}</span><br>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--tx3)">${d.tanggal||'–'}</span>
+      <div class="alert-item" style="border-left:4px solid var(--red); background:rgba(255,51,102,0.05);">
+        <div class="alert-icon" style="color:var(--red); border-color:var(--red); box-shadow:0 0 10px rgba(255,51,102,0.4);">🚨</div>
+        <div style="flex:1;font-size:13px;line-height:1.5;">
+          <strong style="color:var(--red);font-family:var(--font-head);font-size:16px;letter-spacing:1px;">CRITICAL LEVEL 3</strong><br>
+          <span style="color:var(--tx-primary)">${d.judul}</span><br>
+          <span style="color:var(--tx-sec)">${d.lokasi}</span><br>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--tx-muted)">LOG: ${d.tanggal||'–'}</span>
         </div>
       </div>`)
   ];
   document.getElementById('alerts-body').innerHTML=items.join('')||
-    '<div style="text-align:center;color:var(--tx3);font-size:12px;padding:20px;">Tidak ada peringatan aktif</div>';
+    '<div class="tbl-empty">NO ACTIVE ALERTS</div>';
 }
 
 function toggleAlerts(){
@@ -1826,13 +1904,14 @@ function toggleAlerts(){
 function showToast(msg,type=''){
   const el=document.createElement('div');
   el.className='toast-item'+(type==='err'?' t-err':type==='warn'?' t-warn':'');
-  el.innerHTML=`<span>${type==='err'?'❌':type==='warn'?'⚠':'✓'}</span><span>${msg}</span>`;
+  const icon = type==='err'?'❌':type==='warn'?'⚠':'⬡';
+  el.innerHTML=`<span class="toast-icon" style="color:${type==='err'?'var(--red)':type==='warn'?'var(--orange)':'var(--accent)'}">${icon}</span><span>${msg}</span>`;
   const wrap=document.getElementById('toast-wrap');
   wrap.appendChild(el);
   setTimeout(()=>{
-    el.style.opacity='0';el.style.transform='translateX(16px)';el.style.transition='all .3s';
+    el.style.opacity='0';el.style.transform='translateX(50px)';el.style.transition='all .3s';
     setTimeout(()=>el.remove(),300);
-  },3000);
+  },3500);
 }
 
 /* ══ UTILS ══ */
@@ -1841,9 +1920,5 @@ function setText(id,val){const el=document.getElementById(id);if(el)el.textConte
 function setValue(id,val){const el=document.getElementById(id);if(el)el.value=val;}
 </script>
 
-<style>
-/* Pulse for user location */
-@keyframes pulse2{0%{transform:scale(1);opacity:.6}50%{transform:scale(1.8);opacity:0}100%{transform:scale(1);opacity:0}}
-</style>
 </body>
 </html>
